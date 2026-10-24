@@ -15,3 +15,17 @@ export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock   # solo local
 - **BD**: `kubectl -n propuestas exec -it propuestas-db-1 -- psql -U postgres propuestas` (o plugin `kubectl cnpg psql propuestas-db`).
 - **Reconstruir imágenes locales**: `scripts/build-local-images.sh` y `kubectl -n propuestas rollout restart deploy`.
 - **Destruir local**: `scripts/cluster-local-down.sh`.
+
+## CI/CD (plan 011)
+
+**Qué hace fallar el build**
+- `validate.yml` / `manifests`: manifiestos que no pasan kubeconform (`scripts/validate.sh`).
+- `validate.yml` / `k8s-security`: Trivy config con hallazgos HIGH/CRITICAL en `k8s/` (local: `podman run --rm -v $PWD:/w:Z docker.io/aquasec/trivy:latest config --severity HIGH,CRITICAL /w/k8s`).
+- `validate.yml` / `iac`: `tofu validate`, `fmt -check` o tflint en `infra/hetzner` (se omite si no hay `.tf`).
+- `release.yml`: Trivy image con CRITICAL que tenga fix disponible (`ignore-unfixed`) en `propuestas-api`/`propuestas-web`.
+
+**Release:** `scripts/bump-submodules.sh` + push a `main`. El job `bump` commitea `chore(release): api <sha> web <sha> [skip ci]`.
+
+**Paquetes GHCR públicos (una vez, tras la primera release):**
+`gh api -X PATCH /user/packages/container/propuestas-api -f visibility=public` (y `propuestas-web`).
+Si la API lo rechaza: GitHub → Packages → paquete → Package settings → Change visibility → Public.

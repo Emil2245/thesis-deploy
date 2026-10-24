@@ -1,0 +1,106 @@
+name: release
+on:
+  push:
+    branches: [main]
+    paths: ['apps/**', '.gitmodules']
+  workflow_dispatch:
+permissions:
+  contents: write
+  packages: write
+concurrency: release
+env:
+  REGISTRY: ghcr.io/emil2245
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - {name: api, dir: apps/backend, dockerfile: apps/backend/src/main/docker/Dockerfile}
+          - {name: web, dir: apps/frontend, dockerfile: apps/frontend/Dockerfile}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: recursive
+      - name: SHA del submódulo
+        id: sha
+        run: echo "sha=$(git -C '${{ matrix.dir }}' rev-parse --short=7 HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Comprobar si la imagen ya existe
+        id: exists
+        run: |
+          if docker manifest inspect "$REGISTRY/propuestas-${{ matrix.name }}:${{ steps.sha.outputs.sha }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Build y push
+        if: steps.exists.outputs.exists == 'false'
+        uses: docker/build-push-action@v7
+        with:
+          context: ${{ matrix.dir }}
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.REGISTRY }}/propuestas-${{ matrix.name }}:${{ steps.sha.outputs.sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ steps.sha.outputs.sha }}
+            org.opencontainers.image.source=https://github.com/emil2245/thesis-deploy
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,scope=${{ matrix.name }},mode=max
+          provenance: true
+          sbom: true
+      - name: Trivy image (CRITICAL con fix disponible falla el build)
+        uses: aquasecurity/trivy-action@v0.36.0
+        env:
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          image-ref: ${{ env.REGISTRY }}/propuestas-${{ matrix.name }}:${{ steps.sha.outputs.sha }}
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+      - name: Publicar SHA como artefacto
+        run: echo -n "${{ steps.sha.outputs.sha }}" > "sha-${{ matrix.name }}"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: sha-${{ matrix.name }}
+          path: sha-${{ matrix.name }}
+
+  bump:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: sha-*
+          merge-multiple: true
+      - uses: imranismail/setup-kustomize@v3
+      - name: Actualizar tags del overlay prod
+        id: bump
+        run: |
+          api=$(cat sha-api); web=$(cat sha-web)
+          cd k8s/propuestas/overlays/prod
+          kustomize edit set image \
+            "ghcr.io/emil2245/propuestas-api=ghcr.io/emil2245/propuestas-api:${api}" \
+            "ghcr.io/emil2245/propuestas-web=ghcr.io/emil2245/propuestas-web:${web}"
+          echo "msg=chore(release): api ${api} web ${web} [skip ci]" >> "$GITHUB_OUTPUT"
+      - name: Commit y push
+        run: |
+          rm -f sha-api sha-web
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add k8s/propuestas/overlays/prod/kustomization.yaml
+          if git diff --cached --quiet; then echo "sin cambios"; exit 0; fi
+          git commit -m "${{ steps.bump.outputs.msg }}"
+          git pull --rebase origin main
+          git push origin HEAD:main

@@ -1,0 +1,47 @@
+name: validate
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+env:
+  KUBECONFORM_VERSION: v0.8.0
+jobs:
+  manifests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Instalar kubeconform
+        run: |
+          curl -fsSLO "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz"
+          curl -fsSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/CHECKSUMS" -o kc.sums
+          grep ' kubeconform-linux-amd64.tar.gz$' kc.sums | sha256sum -c -
+          mkdir -p "$HOME/.local/bin"
+          tar xzf kubeconform-linux-amd64.tar.gz -C "$HOME/.local/bin" kubeconform
+      - name: kustomize build + kubeconform
+        run: scripts/validate.sh
+
+  k8s-security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Trivy config (HIGH/CRITICAL falla el build)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: config
+          scan-ref: k8s
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+
+  iac:
+    runs-on: ubuntu-latest
+    if: hashFiles('infra/hetzner/*.tf') != ''
+    steps:
+      - uses: actions/checkout@v7
+      - uses: opentofu/setup-opentofu@v2
+      - run: tofu -chdir=infra/hetzner init -backend=false
+      - run: tofu -chdir=infra/hetzner validate
+      - run: tofu -chdir=infra/hetzner fmt -check
+      - uses: terraform-linters/setup-tflint@v6
+      - run: tflint --chdir=infra/hetzner --init && tflint --chdir=infra/hetzner
