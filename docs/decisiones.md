@@ -73,3 +73,6 @@ hcloud ~> 1.70, tflint 0.65.0, k3s `v1.37.1+k3s1` (igual al local). Defaults de 
 
 Nota: `scripts/seal-jwt.sh` aún no existe (plan 009), por lo que `prod-up.sh` trata ese paso como condicional.
 El paso 5 del plan (apply) no se ejecutó: sin `HCLOUD_TOKEN`.
+
+## Entorno `lab` (plan 017)
+Clúster de pruebas de 3 nodos k3s en VMs Hyper-V; overlay `lab` = `local` + CNPG 2 instancias, imágenes GHCR (tags copiados de prod con `scripts/lab/sync-tags.sh`), hosts `*.192.168.1.9.sslip.io`, emisor `local-ca`.

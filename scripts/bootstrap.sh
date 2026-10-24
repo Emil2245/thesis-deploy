@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Uso: scripts/bootstrap.sh <local|prod>
+# Uso: scripts/bootstrap.sh <local|lab|prod>
 set -euo pipefail
-ENV="${1:?uso: bootstrap.sh <local|prod>}"
+ENV="${1:?uso: bootstrap.sh <local|lab|prod>}"
 cd "$(dirname "$0")/.."
 export PATH="$HOME/.local/bin:$PATH"
 ARGOCD_CHART_VERSION=10.11.1
@@ -11,7 +11,7 @@ helm repo update argo >/dev/null
 helm upgrade --install argocd argo/argo-cd -n argocd --create-namespace \
   --version "$ARGOCD_CHART_VERSION" -f "k8s/argocd/values-${ENV}.yaml" --wait --timeout 10m
 
-if [ "$ENV" = local ]; then
+if [ "$ENV" = local ] || [ "$ENV" = lab ]; then
   kubectl create namespace propuestas --dry-run=client -o yaml | kubectl apply -f -
   if ! kubectl -n propuestas get secret propuestas-jwt >/dev/null 2>&1; then
     T="$(mktemp -d)"; trap 'shred -u "$T"/*.pem 2>/dev/null; rm -rf "$T"' EXIT

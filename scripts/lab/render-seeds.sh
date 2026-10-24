@@ -19,5 +19,5 @@ sed -e "s#@@PUBKEY@@#$pub#" -e "s#@@K3S_CMD@@#$cmd#" "$D/user-data.tmpl" > "$out
 cp "$D/network-config" "$out/network-config"
 if grep -riE 'thesis|tesis' "$out"; then echo "ABORT: nombre prohibido en seed" >&2; exit 1; fi
 podman run --rm -v "$out:/w:Z" docker.io/library/ubuntu:24.04 bash -c \
- "apt-get update -qq && apt-get install -y -qq xorriso >/dev/null && cd /w && xorriso -as genisoimage -output ../seed-$name.iso -volid cidata -joliet -rock user-data meta-data network-config"
-echo "$WORK/seed-$name.iso"
+ "apt-get update -qq && apt-get install -y -qq xorriso >/dev/null && cd /w && xorriso -as genisoimage -output /w/seed.iso -volid cidata -joliet -rock user-data meta-data network-config"
+mv "$out/seed.iso" "$WORK/seed-$name.iso"; echo "$WORK/seed-$name.iso"

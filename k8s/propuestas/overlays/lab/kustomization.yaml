@@ -1,0 +1,39 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+images:
+  - {name: ghcr.io/emil2245/propuestas-api, newTag: b025a77}
+  - {name: ghcr.io/emil2245/propuestas-web, newTag: 044cca1}
+configMapGenerator:
+  - name: propuestas-api-config
+    behavior: merge
+    literals:
+      - CORS_ORIGINS=https://propuestas.192.168.1.9.sslip.io
+      - JWT_ISSUER=https://propuestas.local
+      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=lab
+patches:
+  - target: {kind: Cluster, name: propuestas-db}
+    patch: |-
+      - op: replace
+        path: /spec/instances
+        value: 2
+  - target: {kind: Ingress, name: propuestas}
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: propuestas.192.168.1.9.sslip.io
+      - op: add
+        path: /metadata/annotations
+        value:
+          cert-manager.io/cluster-issuer: local-ca
+      - op: add
+        path: /spec/tls
+        value:
+          - hosts: [propuestas.192.168.1.9.sslip.io]
+            secretName: propuestas-tls
+  - target: {kind: Deployment, name: "propuestas-.*"}
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent

@@ -1,0 +1,7 @@
+# Se suma a values.yaml solo en lab.
+grafana:
+  ingress:
+    hosts: [grafana.192.168.1.9.sslip.io]
+    tls:
+      - secretName: grafana-tls
+        hosts: [grafana.192.168.1.9.sslip.io]
