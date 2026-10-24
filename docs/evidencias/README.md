@@ -44,7 +44,7 @@ Notas honestas: el 2.62 % de fallos del failover de BD y el 0.19 % del fallo de 
 de deteccion (kubelet marca NotReady a ~48 s; hasta entonces Traefik/endpoints siguen apuntando a pods
 inalcanzables); no se ajustaron HPA ni umbrales. Los reintentos/readiness no se tocaron.
 
-STEP5_PLACEHOLDER
+Spans JDBC / panel p95 (plan 020 Paso 5): **omitido**, la imagen del plan 019 aun no se habia publicado (el overlay prod sigue en api `b025a77`). Los hallazgos 3 y 4 siguen abiertos.
 
 ## Hallazgos que deben constar en la tesis (fallos honestos)
 
