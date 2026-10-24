@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Instala kubectl, helm, k3d y kubeconform en ~/.local/bin (sin sudo).
+# Instala kubectl, helm, k3d, kubeconform y kubeseal en ~/.local/bin (sin sudo).
 set -euo pipefail
 KUBECTL_VERSION=v1.37.1
 HELM_VERSION=v4.3.1
 K3D_VERSION=v5.9.0
 KUBECONFORM_VERSION=v0.8.0
+KUBESEAL_VERSION=0.40.0
 BIN="${HOME}/.local/bin"; mkdir -p "$BIN"
 T="$(mktemp -d)"; trap 'rm -rf "$T"' EXIT
 cd "$T"
@@ -32,5 +33,11 @@ curl -fsSLO "https://github.com/yannh/kubeconform/releases/download/${KUBECONFOR
 curl -fsSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/CHECKSUMS" -o kc.sums || true
 if [ -s kc.sums ]; then grep ' kubeconform-linux-amd64.tar.gz$' kc.sums | sha256sum -c -; fi
 tar xzf kubeconform-linux-amd64.tar.gz kubeconform; install -m 0755 kubeconform "$BIN/kubeconform"
+
+# kubeseal (checksum publicado)
+curl -fsSLO "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/kubeseal-${KUBESEAL_VERSION}-linux-amd64.tar.gz"
+curl -fsSL "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/sealed-secrets_${KUBESEAL_VERSION}_checksums.txt" -o ks.sums
+grep " kubeseal-${KUBESEAL_VERSION}-linux-amd64.tar.gz\$" ks.sums | sha256sum -c -
+tar xzf "kubeseal-${KUBESEAL_VERSION}-linux-amd64.tar.gz" kubeseal; install -m 0755 kubeseal "$BIN/kubeseal"
 
 echo "Instalado en $BIN:"; for t in kubectl helm k3d kubeconform; do "$BIN/$t" version 2>&1 | head -1 || true; done
