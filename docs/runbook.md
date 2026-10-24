@@ -15,3 +15,11 @@ export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock   # solo local
 - **BD**: `kubectl -n propuestas exec -it propuestas-db-1 -- psql -U postgres propuestas` (o plugin `kubectl cnpg psql propuestas-db`).
 - **Reconstruir imágenes locales**: `scripts/build-local-images.sh` y `kubectl -n propuestas rollout restart deploy`.
 - **Destruir local**: `scripts/cluster-local-down.sh`.
+
+## Producción (OpenTofu, plan 010)
+- **Crear**: `export HCLOUD_TOKEN=... TF_VAR_admin_cidrs='["<ip>/32"]'; scripts/prod-up.sh` (kubeconfig en `~/.kube/propuestas-prod.yaml`, fuera del repo).
+- **Destruir**: `scripts/prod-down.sh` (pide confirmación).
+- **State**: local en `infra/hetzner/terraform.tfstate` (git-ignorado, contiene el token k3s). Perderlo = recursos huérfanos en Hetzner.
+- **Escalar**: subir `agent_count` y `tofu apply`; los agents se unen solos.
+- **Costo**: ver [infra/hetzner/README.md](../infra/hetzner/README.md) (estimado, verificar en consola).
+- **LOPDP**: la región `ash` (EE.UU.) es transferencia internacional de datos; declararla o usar `nbg1`.

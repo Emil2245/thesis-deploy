@@ -40,3 +40,14 @@ sudo systemctl daemon-reload
 
 Luego cerrar sesión y volver a entrar (o reiniciar) y ejecutar `scripts/cluster-local-up.sh`.
 Verificación: `cat /sys/fs/cgroup/user.slice/user-$(id -u).slice/user@$(id -u).service/cgroup.controllers` debe incluir `cpuset`.
+
+## IaC: OpenTofu (plan 010)
+
+OpenTofu en vez de Terraform (licencia BSL), Pulumi (requiere lenguaje general + backend propio) o Ansible
+(imperativo, sin state ni plan/diff): es el fork open-source bajo la Linux Foundation, compatible con HCL y
+con el provider `hcloud`. k3s se instala por cloud-init (sin Ansible). Versiones: OpenTofu 1.13.2, provider
+hcloud ~> 1.70, tflint 0.65.0, k3s `v1.37.1+k3s1` (igual al local). Defaults de región/tipos y costos en
+[infra/hetzner/README.md](../infra/hetzner/README.md).
+
+Nota: `scripts/seal-jwt.sh` aún no existe (plan 009), por lo que `prod-up.sh` trata ese paso como condicional.
+El paso 5 del plan (apply) no se ejecutó: sin `HCLOUD_TOKEN`.

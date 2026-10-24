@@ -11,7 +11,8 @@ k8s/argocd/                   values de Argo CD y app-of-apps (root-local/prod)
 k8s/platform/                 add-ons (CloudNativePG; plan 009 agrega más)
 k8s/apps/                     Applications de la app por entorno
 k8s/propuestas/{base,overlays/{local,prod}}   manifiestos Kustomize
-scripts/                      install-tools, cluster-local-up/down, build-local-images, bootstrap, validate
+infra/hetzner/                OpenTofu: Hetzner + k3s (plan 010)
+scripts/                      install-tools, prod-up/down, cluster-local-up/down, build-local-images, bootstrap, validate
 docs/                         decisiones.md, runbook.md
 ```
 
@@ -26,6 +27,14 @@ scripts/build-local-images.sh      # BACKEND_DIR / FRONTEND_DIR para apuntar a o
 scripts/bootstrap.sh local
 ```
 App en http://propuestas.127.0.0.1.sslip.io:8080
+
+## Producción (Hetzner + k3s con OpenTofu)
+```bash
+export HCLOUD_TOKEN=... TF_VAR_admin_cidrs='["<tu-ip>/32"]'
+scripts/prod-up.sh      # crea red, firewall, 2 VMs, k3s y Argo CD
+scripts/prod-down.sh    # destruye todo
+```
+Detalles, costos y state: [infra/hetzner/README.md](infra/hetzner/README.md).
 
 ## Releases
 Los submódulos fijan la versión de la app: `git submodule update --remote` + commit = nueva release.

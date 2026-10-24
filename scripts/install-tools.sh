@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-# Instala kubectl, helm, k3d y kubeconform en ~/.local/bin (sin sudo).
+# Instala kubectl, helm, k3d, kubeconform, tofu y tflint en ~/.local/bin (sin sudo).
 set -euo pipefail
 KUBECTL_VERSION=v1.37.1
 HELM_VERSION=v4.3.1
 K3D_VERSION=v5.9.0
 KUBECONFORM_VERSION=v0.8.0
+TOFU_VERSION=1.13.2
+TFLINT_VERSION=v0.65.0
 BIN="${HOME}/.local/bin"; mkdir -p "$BIN"
 T="$(mktemp -d)"; trap 'rm -rf "$T"' EXIT
 cd "$T"
@@ -33,4 +35,17 @@ curl -fsSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM
 if [ -s kc.sums ]; then grep ' kubeconform-linux-amd64.tar.gz$' kc.sums | sha256sum -c -; fi
 tar xzf kubeconform-linux-amd64.tar.gz kubeconform; install -m 0755 kubeconform "$BIN/kubeconform"
 
-echo "Instalado en $BIN:"; for t in kubectl helm k3d kubeconform; do "$BIN/$t" version 2>&1 | head -1 || true; done
+# OpenTofu (SHA256SUMS publicado)
+curl -fsSLO "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.tar.gz"
+curl -fsSL "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_SHA256SUMS" -o tofu.sums
+grep " tofu_${TOFU_VERSION}_linux_amd64.tar.gz\$" tofu.sums | sha256sum -c -
+tar xzf "tofu_${TOFU_VERSION}_linux_amd64.tar.gz" tofu; install -m 0755 tofu "$BIN/tofu"
+
+# tflint (checksums.txt publicado)
+curl -fsSLO "https://github.com/terraform-linters/tflint/releases/download/${TFLINT_VERSION}/tflint_linux_amd64.zip"
+curl -fsSL "https://github.com/terraform-linters/tflint/releases/download/${TFLINT_VERSION}/checksums.txt" -o tflint.sums
+grep ' tflint_linux_amd64.zip$' tflint.sums | sha256sum -c -
+python3 -c 'import zipfile;zipfile.ZipFile("tflint_linux_amd64.zip").extract("tflint")'; install -m 0755 tflint "$BIN/tflint"
+
+echo "Instalado en $BIN:"; for t in kubectl helm k3d kubeconform tofu; do "$BIN/$t" version 2>&1 | head -1 || true; done
+"$BIN/tflint" --version | head -1
