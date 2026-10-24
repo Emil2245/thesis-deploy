@@ -1,0 +1,256 @@
+{
+    "batches": [
+        {
+            "resource": {
+                "attributes": [
+                    {
+                        "key": "deployment.environment",
+                        "value": {
+                            "stringValue": "lab"
+                        }
+                    },
+                    {
+                        "key": "host.name",
+                        "value": {
+                            "stringValue": "propuestas-api-68c646b8d8-tqjp5"
+                        }
+                    },
+                    {
+                        "key": "service.namespace",
+                        "value": {
+                            "stringValue": "propuestas"
+                        }
+                    },
+                    {
+                        "key": "service.version",
+                        "value": {
+                            "stringValue": "1.0.0-SNAPSHOT"
+                        }
+                    },
+                    {
+                        "key": "telemetry.sdk.language",
+                        "value": {
+                            "stringValue": "java"
+                        }
+                    },
+                    {
+                        "key": "telemetry.sdk.name",
+                        "value": {
+                            "stringValue": "opentelemetry"
+                        }
+                    },
+                    {
+                        "key": "telemetry.sdk.version",
+                        "value": {
+                            "stringValue": "1.60.1"
+                        }
+                    },
+                    {
+                        "key": "webengine.name",
+                        "value": {
+                            "stringValue": "Quarkus"
+                        }
+                    },
+                    {
+                        "key": "webengine.version",
+                        "value": {
+                            "stringValue": "3.37.4"
+                        }
+                    },
+                    {
+                        "key": "service.name",
+                        "value": {
+                            "stringValue": "propuestas-api"
+                        }
+                    },
+                    {
+                        "key": "k8s.namespace.name",
+                        "value": {
+                            "stringValue": "propuestas"
+                        }
+                    }
+                ]
+            },
+            "scopeSpans": [
+                {
+                    "scope": {
+                        "name": "io.opentelemetry.jdbc",
+                        "version": "2.26.1-alpha"
+                    },
+                    "spans": [
+                        {
+                            "traceId": "pi2EXkQmCw5ZajBQ2nDuiA==",
+                            "spanId": "o8CWiDwHIr8=",
+                            "parentSpanId": "LA2b0cwOH5U=",
+                            "name": "SELECT propuestas.usuario",
+                            "kind": "SPAN_KIND_CLIENT",
+                            "startTimeUnixNano": "1792831918934268835",
+                            "endTimeUnixNano": "1792831918935904782",
+                            "attributes": [
+                                {
+                                    "key": "db.operation",
+                                    "value": {
+                                        "stringValue": "SELECT"
+                                    }
+                                },
+                                {
+                                    "key": "db.sql.table",
+                                    "value": {
+                                        "stringValue": "usuario"
+                                    }
+                                },
+                                {
+                                    "key": "db.name",
+                                    "value": {
+                                        "stringValue": "propuestas"
+                                    }
+                                },
+                                {
+                                    "key": "server.port",
+                                    "value": {
+                                        "intValue": "5432"
+                                    }
+                                },
+                                {
+                                    "key": "db.connection_string",
+                                    "value": {
+                                        "stringValue": "postgresql://propuestas-db-rw:5432"
+                                    }
+                                },
+                                {
+                                    "key": "server.address",
+                                    "value": {
+                                        "stringValue": "propuestas-db-rw"
+                                    }
+                                },
+                                {
+                                    "key": "db.system",
+                                    "value": {
+                                        "stringValue": "postgresql"
+                                    }
+                                },
+                                {
+                                    "key": "db.statement",
+                                    "value": {
+                                        "stringValue": "select u1_0.id,u1_0.activo,u1_0.created_at,u1_0.email,u1_0.email_verificado,u1_0.nombre,u1_0.password_hash,u1_0.public_id,u1_0.rol,u1_0.updated_at from usuario u1_0 where u1_0.email=? fetch first ? rows only"
+                                    }
+                                }
+                            ],
+                            "status": {}
+                        }
+                    ]
+                },
+                {
+                    "scope": {
+                        "name": "io.quarkus.opentelemetry"
+                    },
+                    "spans": [
+                        {
+                            "traceId": "pi2EXkQmCw5ZajBQ2nDuiA==",
+                            "spanId": "LA2b0cwOH5U=",
+                            "name": "POST /auth/login",
+                            "kind": "SPAN_KIND_SERVER",
+                            "startTimeUnixNano": "1792831918932050606",
+                            "endTimeUnixNano": "1792831919062638686",
+                            "attributes": [
+                                {
+                                    "key": "http.response.body.size",
+                                    "value": {
+                                        "intValue": "80"
+                                    }
+                                },
+                                {
+                                    "key": "code.function.name",
+                                    "value": {
+                                        "stringValue": "ec.uce.propuestas.usuario.auth.AuthResource.login"
+                                    }
+                                },
+                                {
+                                    "key": "url.scheme",
+                                    "value": {
+                                        "stringValue": "https"
+                                    }
+                                },
+                                {
+                                    "key": "url.path",
+                                    "value": {
+                                        "stringValue": "/api/v1/auth/login"
+                                    }
+                                },
+                                {
+                                    "key": "http.request.body.size",
+                                    "value": {
+                                        "intValue": "30"
+                                    }
+                                },
+                                {
+                                    "key": "server.address",
+                                    "value": {
+                                        "stringValue": "propuestas.192.168.1.9.sslip.io"
+                                    }
+                                },
+                                {
+                                    "key": "client.address",
+                                    "value": {
+                                        "stringValue": "10.42.0.1"
+                                    }
+                                },
+                                {
+                                    "key": "user_agent.original",
+                                    "value": {
+                                        "stringValue": "curl/8.18.0"
+                                    }
+                                },
+                                {
+                                    "key": "http.response.status_code",
+                                    "value": {
+                                        "intValue": "401"
+                                    }
+                                },
+                                {
+                                    "key": "http.route",
+                                    "value": {
+                                        "stringValue": "/auth/login"
+                                    }
+                                },
+                                {
+                                    "key": "http.request.method",
+                                    "value": {
+                                        "stringValue": "POST"
+                                    }
+                                }
+                            ],
+                            "events": [
+                                {
+                                    "timeUnixNano": "1792831919061218632",
+                                    "name": "exception",
+                                    "attributes": [
+                                        {
+                                            "key": "exception.stacktrace",
+                                            "value": {
+                                                "stringValue": "jakarta.ws.rs.WebApplicationException: HTTP 401 Unauthorized\n\tat ec.uce.propuestas.usuario.auth.AuthService.error(AuthService.java:313)\n\tat ec.uce.propuestas.usuario.auth.AuthService.login(AuthService.java:124)\n\tat ec.uce.propuestas.usuario.auth.AuthService_Subclass.login$$superforward(Unknown Source)\n\tat ec.uce.propuestas.usuario.auth.AuthService_Subclass$1.apply(Unknown Source)\n\tat io.quarkus.arc.impl.AroundInvokeInvocationContext.proceed(AroundInvokeInvocationContext.java:73)\n\tat io.quarkus.arc.impl.AroundInvokeInvocationContext.proceed(AroundInvokeInvocationContext.java:62)\n\tat io.quarkus.narayana.jta.runtime.interceptor.TransactionalInterceptorBase.invokeInOurTx(TransactionalInterceptorBase.java:167)\n\tat io.quarkus.narayana.jta.runtime.interceptor.TransactionalInterceptorBase.invokeInOurTx(TransactionalInterceptorBase.java:138)\n\tat io.quarkus.narayana.jta.runtime.interceptor.TransactionalInterceptorRequired.doIntercept(TransactionalInterceptorRequired.java:37)\n\tat io.quarkus.narayana.jta.runtime.interceptor.TransactionalInterceptorBase.intercept(TransactionalInterceptorBase.java:82)\n\tat io.quarkus.narayana.jta.runtime.interceptor.TransactionalInterceptorRequired.intercept(TransactionalInterceptorRequired.java:31)\n\tat io.quarkus.narayana.jta.runtime.interceptor.TransactionalInterceptorRequired_Bean.intercept(Unknown Source)\n\tat io.quarkus.arc.impl.InterceptorInvocation.invoke(InterceptorInvocation.java:42)\n\tat io.quarkus.arc.impl.AroundInvokeInvocationContext.perform(AroundInvokeInvocationContext.java:30)\n\tat io.quarkus.arc.impl.InvocationContexts.performAroundInvoke(InvocationContexts.java:27)\n\tat ec.uce.propuestas.usuario.auth.AuthService_Subclass.login(Unknown Source)\n\tat ec.uce.propuestas.usuario.auth.AuthService_ClientProxy.login(Unknown Source)\n\tat ec.uce.propuestas.usuario.auth.AuthResource.login(AuthResource.java:58)\n\tat ec.uce.propuestas.usuario.auth.AuthResource_Subclass.login$$superforward(Unknown Source)\n\tat ec.uce.propuestas.usuario.auth.AuthResource_Subclass$1.apply(Unknown Source)\n\tat io.quarku"
+                                            }
+                                        },
+                                        {
+                                            "key": "exception.message",
+                                            "value": {
+                                                "stringValue": "HTTP 401 Unauthorized"
+                                            }
+                                        },
+                                        {
+                                            "key": "exception.type",
+                                            "value": {
+                                                "stringValue": "jakarta.ws.rs.WebApplicationException"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "status": {}
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

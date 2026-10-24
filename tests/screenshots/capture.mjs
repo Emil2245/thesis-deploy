@@ -26,6 +26,11 @@ if (job === 'dash') { // dash <file> <fromMs|now-30m> <toMs|now>
   await grafana(`/explore?orgId=1&left=${encodeURIComponent(JSON.stringify(t))}`, ft, 12000);
   const l = { datasource: 'loki', queries: [{ refId: 'A', datasource: { type: 'loki', uid: 'loki' }, expr: `{namespace="propuestas"} |= \`${tid}\`` }], range: { from: 'now-3h', to: 'now' } };
   await grafana(`/explore?orgId=1&left=${encodeURIComponent(JSON.stringify(l))}`, fl, 12000);
+} else if (job === 'jdbc') { // jdbc <traceId> <fileTrace> <fileDash>  (trace con span hijo JDBC + dashboard p95, ultimos 15 min)
+  const [tid, ft, fd] = a;
+  const t = { datasource: 'tempo', queries: [{ refId: 'A', datasource: { type: 'tempo', uid: 'tempo' }, queryType: 'traceql', query: tid }], range: { from: 'now-3h', to: 'now' } };
+  await grafana(`/explore?orgId=1&left=${encodeURIComponent(JSON.stringify(t))}`, ft, 12000);
+  await grafana('/d/propuestas-overview/propuestas-resumen?orgId=1&from=now-15m&to=now&kiosk', fd, 12000);
 } else if (job === 'argo') { // requiere port-forward svc/argocd-server 8081:80 ; argo <dir>
   const ctx = await browser.newContext(ctxOpts); const p = await ctx.newPage();
   await p.goto('http://localhost:8081/login'); await p.fill('input[name=username]', 'admin'); await p.fill('input[name=password]', process.env.ARGO_PASSWORD);
