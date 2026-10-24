@@ -47,3 +47,9 @@ Si la API lo rechaza: GitHub → Packages → paquete → Package settings → C
 - **Tempo**: `kubectl -n monitoring port-forward svc/tempo 3200`; `curl -s 'localhost:3200/api/search?tags=service.name%3Dpropuestas-api&limit=5'`. En Grafana, Explore > Tempo, o salto desde un log (campo derivado `traceId`).
 - **Certificados**: `kubectl get certificate -A`; `kubectl describe certificate -n propuestas propuestas-tls`. Si Let's Encrypt limita, cambiar el issuer del Ingress prod a `letsencrypt-staging`. El email ACME es placeholder (`ACME_EMAIL_CHANGE_ME@example.invalid`): reemplazar en `k8s/platform/issuers/manifests/issuers.yaml` antes del deploy prod.
 - **Rotar la llave JWT**: `scripts/install-tools.sh` (kubeseal), contexto kubectl del cluster destino, `scripts/seal-jwt.sh prod`, commit del `sealed-jwt.yaml` generado (solo cifrado), descomentarlo en `k8s/propuestas/overlays/prod/kustomization.yaml`, push y `kubectl -n propuestas rollout restart deploy/propuestas-api`.
+
+## Entorno `lab` (k3s en Hyper-V)
+
+Ver `clusters/lab/README.md`. Bootstrap: `KUBECONFIG=~/.kube/propuestas-lab.yaml scripts/bootstrap.sh lab`.
+Actualizar tags: `scripts/lab/sync-tags.sh`. Prueba de fallo de nodo: `Stop-VM k3s-lab-3 -TurnOff` vía `scripts/lab/winps.sh`.
+Nota: un arranque en frío del PC bloquea VT-x; reiniciar en caliente desde macOS (Boot Camp).
