@@ -21,7 +21,7 @@ export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock   # solo local
 **Qué hace fallar el build**
 - `validate.yml` / `manifests`: manifiestos que no pasan kubeconform (`scripts/validate.sh`).
 - `validate.yml` / `k8s-security`: Trivy config con hallazgos HIGH/CRITICAL en `k8s/` (local: `podman run --rm -v $PWD:/w:Z docker.io/aquasec/trivy:latest config --severity HIGH,CRITICAL /w/k8s`).
-- `validate.yml` / `iac`: `tofu validate`, `fmt -check` o tflint en `infra/hetzner` (se omite si no hay `.tf`).
+- `validate.yml` / `iac`: `tofu validate`, `fmt -check` o tflint en `infra/hetzner` .
 - `release.yml`: Trivy image con CRITICAL que tenga fix disponible (`ignore-unfixed`) en `propuestas-api`/`propuestas-web`.
 
 **Release:** `scripts/bump-submodules.sh` + push a `main`. El job `bump` commitea `chore(release): api <sha> web <sha> [skip ci]`.
@@ -29,3 +29,11 @@ export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock   # solo local
 **Paquetes GHCR públicos (una vez, tras la primera release):**
 `gh api -X PATCH /user/packages/container/propuestas-api -f visibility=public` (y `propuestas-web`).
 Si la API lo rechaza: GitHub → Packages → paquete → Package settings → Change visibility → Public.
+
+## Producción (OpenTofu, plan 010)
+- **Crear**: `export HCLOUD_TOKEN=... TF_VAR_admin_cidrs='["<ip>/32"]'; scripts/prod-up.sh` (kubeconfig en `~/.kube/propuestas-prod.yaml`, fuera del repo).
+- **Destruir**: `scripts/prod-down.sh` (pide confirmación).
+- **State**: local en `infra/hetzner/terraform.tfstate` (git-ignorado, contiene el token k3s). Perderlo = recursos huérfanos en Hetzner.
+- **Escalar**: subir `agent_count` y `tofu apply`; los agents se unen solos.
+- **Costo**: ver [infra/hetzner/README.md](../infra/hetzner/README.md) (estimado, verificar en consola).
+- **LOPDP**: la región `ash` (EE.UU.) es transferencia internacional de datos; declararla o usar `nbg1`.

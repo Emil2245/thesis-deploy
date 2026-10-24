@@ -1,0 +1,23 @@
+#cloud-config
+package_update: true
+packages: [unattended-upgrades, curl]
+write_files:
+  - path: /etc/ssh/sshd_config.d/99-hardening.conf
+    content: |
+      PasswordAuthentication no
+      PermitRootLogin prohibit-password
+  - path: /etc/apt/apt.conf.d/20auto-upgrades
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+runcmd:
+  - systemctl restart ssh
+  - |
+    for i in $(seq 1 60); do
+      IFACE=$(ip -o -4 addr show | awk '/10\.0\.1\./{print $2}' | head -1)
+      [ -n "$IFACE" ] && break
+      sleep 2
+    done
+    curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION='${k3s_version}' K3S_TOKEN='${k3s_token}' sh -s - server \
+      --node-ip ${private_ip} --advertise-address ${private_ip} \
+      --tls-san ${public_ip} --flannel-iface "$IFACE" --write-kubeconfig-mode 600

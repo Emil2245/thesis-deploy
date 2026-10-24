@@ -1,0 +1,5 @@
+# Copiar a terraform.tfvars (ignorado por git). El token va en HCLOUD_TOKEN, nunca aqui.
+admin_cidrs = ["203.0.113.7/32"] # tu IP publica
+# location           = "ash"   # o "nbg1" con server_type_server="cx33", server_type_agent="cx23"
+# agent_count        = 1
+# ssh_public_key_path = "~/.ssh/id_ed25519.pub"
