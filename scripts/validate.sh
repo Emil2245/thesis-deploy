@@ -15,3 +15,15 @@ for e in local prod; do
     -schema-location default \
     -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
 done
+for d in issuers dashboards; do
+  echo "== platform/$d/manifests"
+  kubectl kustomize "k8s/platform/$d/manifests" | kubeconform -strict -summary -ignore-missing-schemas \
+    -schema-location default \
+    -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
+done
+echo "== dashboard JSON"
+kubectl kustomize k8s/platform/dashboards/manifests \
+  | python3 -c 'import sys,json,re
+t=sys.stdin.read(); import subprocess
+# extrae el bloque literal data.propuestas.json y lo valida
+m=re.search(r"propuestas.json: \|\n((?:    .*\n)+)", t); json.loads("\n".join(l[4:] for l in m.group(1).splitlines())); print("dashboard JSON OK")'
