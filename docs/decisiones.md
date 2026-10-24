@@ -76,3 +76,6 @@ El paso 5 del plan (apply) no se ejecutó: sin `HCLOUD_TOKEN`.
 
 ## Entorno `lab` (plan 017)
 Clúster de pruebas de 3 nodos k3s en VMs Hyper-V; overlay `lab` = `local` + CNPG 2 instancias, imágenes GHCR (tags copiados de prod con `scripts/lab/sync-tags.sh`), hosts `*.192.168.1.9.sslip.io`, emisor `local-ca`.
+
+## Resiliencia (plan 020)
+`preStop: sleep 10` (+ `terminationGracePeriodSeconds` 40 api / 30 web, cumpliendo sleep < grace - apagado de Quarkus 20 s) elimina los 502 del rolling update (0 fallos en 2 corridas). `tolerationSeconds: 30` para `not-ready`/`unreachable` acelera la reprogramacion (46 s tras NotReady) a costa de mas churn ante cortes breves de red. Operador CNPG con 2 replicas (leader election) y anti-affinity por nodo: el failover del primario ocurre 20 s tras NotReady aunque caiga su nodo. Evidencia en `docs/evidencias/README.md` (seccion v2). `JWT_ISSUER=https://propuestas-api.local` en base y overlays.
