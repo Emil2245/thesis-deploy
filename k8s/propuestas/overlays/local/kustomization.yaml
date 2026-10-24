@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+images:
+  - {name: ghcr.io/emil2245/propuestas-api, newTag: local}
+  - {name: ghcr.io/emil2245/propuestas-web, newTag: local}
+configMapGenerator:
+  - name: propuestas-api-config
+    behavior: merge
+    literals:
+      - CORS_ORIGINS=http://propuestas.127.0.0.1.sslip.io:8080
+      - JWT_ISSUER=https://propuestas.local
+patches:
+  - target: {kind: Ingress, name: propuestas}
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: propuestas.127.0.0.1.sslip.io
+  - target: {kind: Deployment, name: "propuestas-.*"}
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent

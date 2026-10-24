@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: propuestas
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: propuestas.example.invalid
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend: {service: {name: propuestas-api, port: {number: 8080}}}
+          - path: /
+            pathType: Prefix
+            backend: {service: {name: propuestas-web, port: {number: 8080}}}

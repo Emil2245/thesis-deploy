@@ -1,0 +1,8 @@
+*.pem
+.secrets/
+kubeconfig*
+*.tfstate*
+.terraform/
+*.tfvars
+!*.tfvars.example
+tests/load/results/

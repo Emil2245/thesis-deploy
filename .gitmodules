@@ -1,0 +1,6 @@
+[submodule "apps/backend"]
+	path = apps/backend
+	url = https://github.com/emil2245/thesis-back-quarkus
+[submodule "apps/frontend"]
+	path = apps/frontend
+	url = https://github.com/emil2245/thesis-front-react
