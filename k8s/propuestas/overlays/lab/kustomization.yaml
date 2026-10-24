@@ -10,7 +10,7 @@ configMapGenerator:
     behavior: merge
     literals:
       - CORS_ORIGINS=https://propuestas.192.168.1.9.sslip.io
-      - JWT_ISSUER=https://propuestas.local
+      - JWT_ISSUER=https://propuestas-api.local
       - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=lab
 patches:
   - target: {kind: Cluster, name: propuestas-db}
