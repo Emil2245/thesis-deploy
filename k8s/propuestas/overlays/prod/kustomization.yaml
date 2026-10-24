@@ -2,10 +2,18 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ../../base
+  - middleware-redirect-https.yaml
+  # plan 010: descomentar tras generar sealed-jwt.yaml con scripts/seal-jwt.sh prod
+  # - sealed-jwt.yaml
 images:
   # plan 011 bumps these tags
   - {name: ghcr.io/emil2245/propuestas-api, newTag: CHANGE_ME}
   - {name: ghcr.io/emil2245/propuestas-web, newTag: CHANGE_ME}
+configMapGenerator:
+  - name: propuestas-api-config
+    behavior: merge
+    literals:
+      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=prod
 patches:
   - target: {kind: Cluster, name: propuestas-db}
     patch: |-
@@ -17,7 +25,18 @@ patches:
         value: 5Gi
   - target: {kind: Ingress, name: propuestas}
     patch: |-
-      # plan 010 replaces PROD_IP; plan 009 adds the TLS block
+      # plan 010 replaces PROD_IP
       - op: replace
         path: /spec/rules/0/host
         value: propuestas.PROD_IP.sslip.io
+      - op: add
+        path: /metadata/annotations
+        value:
+          # si hay rate limit de Let's Encrypt, probar primero con letsencrypt-staging
+          cert-manager.io/cluster-issuer: letsencrypt-prod
+          traefik.ingress.kubernetes.io/router.middlewares: propuestas-redirect-https@kubernetescrd
+      - op: add
+        path: /spec/tls
+        value:
+          - hosts: [propuestas.PROD_IP.sslip.io]
+            secretName: propuestas-tls

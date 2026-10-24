@@ -16,7 +16,7 @@ spec:
       cpu: 100m
       memory: 256Mi
   monitoring:
-    enablePodMonitor: false
+    enablePodMonitor: true
   affinity:
     enablePodAntiAffinity: true
     topologyKey: kubernetes.io/hostname

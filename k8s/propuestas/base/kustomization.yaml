@@ -6,6 +6,7 @@ resources:
   - db-cluster.yaml
   - backend-deployment.yaml
   - backend-service.yaml
+  - backend-servicemonitor.yaml
   - backend-hpa.yaml
   - backend-pdb.yaml
   - web-deployment.yaml
@@ -23,7 +24,7 @@ configMapGenerator:
       - JWT_ISSUER=https://propuestas.example.invalid
       - CORS_ORIGINS=https://propuestas.example.invalid
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy.monitoring.svc:4317
-      - OTEL_SDK_DISABLED=true
+      - OTEL_SDK_DISABLED=false
       - DISPLAY_PRECISION=2
       - DISPLAY_PRECISION_PORCENTAJE=4
       - JAVA_OPTS_APPEND=-XX:MaxRAMPercentage=75 -Djava.util.logging.manager=org.jboss.logmanager.LogManager
