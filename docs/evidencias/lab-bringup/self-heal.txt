@@ -1,0 +1,13 @@
+delete pod/propuestas-web-7d68f676c4-m4v5b
+pod "propuestas-web-7d68f676c4-m4v5b" deleted from propuestas namespace
+propuestas-web-7d68f676c4-7mw2p   1/1     Running   0               40s
+propuestas-web-7d68f676c4-xksbn   1/1     Running   0               9m27s
+--- scale api to 1
+deployment.apps/propuestas-api scaled
+NAME                             READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/propuestas-api   2/2     2            2           10m
+deployment.apps/propuestas-web   2/2     2            2           10m
+
+NAME                                                 REFERENCE                   TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/propuestas-api   Deployment/propuestas-api   cpu: 2%/60%   2         6         2          10m
+horizontalpodautoscaler.autoscaling/propuestas-web   Deployment/propuestas-web   cpu: 2%/70%   2         4         2          10m

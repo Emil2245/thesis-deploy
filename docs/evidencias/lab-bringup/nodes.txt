@@ -1,0 +1,8 @@
+NAME        STATUS   ROLES           AGE   VERSION        INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION              CONTAINER-RUNTIME
+k3s-lab-1   Ready    control-plane   26m   v1.37.1+k3s1   192.168.1.9    <none>        Ubuntu 24.04.5 LTS   6.8.0-147-generic (amd64)   containerd://2.3.4-k3s1
+k3s-lab-2   Ready    <none>          14m   v1.37.1+k3s1   192.168.1.10   <none>        Ubuntu 24.04.5 LTS   6.8.0-147-generic (amd64)   containerd://2.3.4-k3s1
+k3s-lab-3   Ready    <none>          13m   v1.37.1+k3s1   192.168.1.11   <none>        Ubuntu 24.04.5 LTS   6.8.0-147-generic (amd64)   containerd://2.3.4-k3s1
+NAME        CPU(cores)   CPU(%)   MEMORY(bytes)   MEMORY(%)   
+k3s-lab-1   336m         8%       2978Mi          24%         
+k3s-lab-2   326m         8%       1371Mi          13%         
+k3s-lab-3   190m         4%       1060Mi          10%         

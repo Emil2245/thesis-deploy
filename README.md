@@ -7,10 +7,10 @@ describe el despliegue con **Kustomize**; **Argo CD** sincroniza el clúster des
 ```
 apps/backend, apps/frontend   submódulos (thesis-back-quarkus, thesis-front-react)
 clusters/local/               configuración k3d
-k8s/argocd/                   values de Argo CD y app-of-apps (root-local/prod)
+k8s/argocd/                   values de Argo CD y app-of-apps (root-local/lab/prod)
 k8s/platform/                 add-ons por directorio: CloudNativePG, cert-manager+issuers, kube-prometheus-stack, loki, tempo, alloy, dashboards, sealed-secrets
 k8s/apps/                     Applications de la app por entorno
-k8s/propuestas/{base,overlays/{local,prod}}   manifiestos Kustomize
+k8s/propuestas/{base,overlays/{local,lab,prod}}   manifiestos Kustomize
 infra/hetzner/                OpenTofu: Hetzner + k3s (plan 010)
 scripts/                      install-tools, prod-up/down, cluster-local-up/down, build-local-images, bootstrap, validate, bump-submodules, seal-jwt
 .github/workflows/            validate.yml (PR/push), release.yml (build+push GHCR+bump GitOps)

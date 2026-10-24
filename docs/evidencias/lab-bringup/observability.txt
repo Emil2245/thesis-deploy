@@ -1,0 +1,23 @@
+== prometheus up{namespace=propuestas}
+propuestas-api-7656545d54-skhbp 1
+propuestas-db-1 0
+propuestas-db-2 0
+propuestas-api-7656545d54-kkgkn 1
+== loki api logs
+2 streams
+['propuestas-api-7656545d54-skhbp', 'propuestas-db-1']
+== dashboards
+grafana-dashboard-propuestas                              1     12m
+kube-prometheus-stack-alertmanager-overview               1     11m
+kube-prometheus-stack-apiserver                           1     11m
+kube-prometheus-stack-cluster-total                       1     11m
+kube-prometheus-stack-grafana-overview                    1     11m
+kube-prometheus-stack-k8s-coredns                         1     11m
+kube-prometheus-stack-k8s-resources-cluster               1     11m
+kube-prometheus-stack-k8s-resources-multicluster          1     11m
+kube-prometheus-stack-k8s-resources-namespace             1     11m
+kube-prometheus-stack-k8s-resources-node                  1     11m
+== top pods
+propuestas     propuestas-web-7d68f676c4-xksbn                             1m           4Mi             
+                                                                           ________     ________        
+                                                                           171m         2724Mi          
