@@ -12,7 +12,7 @@ k8s/platform/                 add-ons por directorio: CloudNativePG, cert-manage
 k8s/apps/                     Applications de la app por entorno
 k8s/propuestas/{base,overlays/{local,lab,prod}}   manifiestos Kustomize
 infra/hetzner/                OpenTofu: Hetzner + k3s (plan 010)
-scripts/                      install-tools, prod-up/down, cluster-local-up/down, build-local-images, bootstrap, validate, bump-submodules, seal-jwt
+scripts/                      install-tools, prod-up/down, cluster-local-up/down, build-local-images, bootstrap, validate, bump-submodules, seal-jwt, lab/ (tunnel-url)
 .github/workflows/            validate.yml (PR/push), release.yml (build+push GHCR+bump GitOps)
 docs/                         decisiones.md, runbook.md
 ```

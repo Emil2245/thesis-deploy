@@ -15,7 +15,7 @@ for e in local lab prod; do
     -schema-location default \
     -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
 done
-for d in issuers dashboards; do
+for d in issuers dashboards tunnel; do
   echo "== platform/$d/manifests"
   kubectl kustomize "k8s/platform/$d/manifests" | kubeconform -strict -summary -ignore-missing-schemas \
     -schema-location default \

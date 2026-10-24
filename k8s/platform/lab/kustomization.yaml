@@ -10,6 +10,7 @@ resources:
   - ../tempo
   - ../alloy
   - ../dashboards
+  - ../tunnel
   - ../../apps/propuestas-lab
 patches:
   # lab: host de Grafana con la IP del servidor (values-lab.yaml)

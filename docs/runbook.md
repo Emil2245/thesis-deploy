@@ -53,3 +53,9 @@ Si la API lo rechaza: GitHub → Packages → paquete → Package settings → C
 Ver `clusters/lab/README.md`. Bootstrap: `KUBECONFIG=~/.kube/propuestas-lab.yaml scripts/bootstrap.sh lab`.
 Actualizar tags: `scripts/lab/sync-tags.sh`. Prueba de fallo de nodo: `Stop-VM k3s-lab-3 -TurnOff` vía `scripts/lab/winps.sh`.
 Nota: un arranque en frío del PC bloquea VT-x; reiniciar en caliente desde macOS (Boot Camp).
+
+## Quick tunnel público (lab, plan 018)
+
+URL actual: `scripts/lab/tunnel-url.sh`. Cambia al reiniciar: `kubectl -n tunnel rollout restart deploy/cloudflared`.
+Desactivar: quitar `../tunnel` de `k8s/platform/lab/kustomization.yaml`.
+Seguridad: la app es pública mientras el túnel corre; los usuarios demo del seed V004 tienen contraseñas conocidas, cambiarlas antes de compartir la URL.

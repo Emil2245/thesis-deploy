@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tunnel
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/emil2245/thesis-deploy
+    targetRevision: main
+    path: k8s/platform/tunnel/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tunnel
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}
+    syncOptions: [CreateNamespace=true]
