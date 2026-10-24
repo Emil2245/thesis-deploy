@@ -19,6 +19,9 @@ spec:
         app.kubernetes.io/name: propuestas-web
     spec:
       terminationGracePeriodSeconds: 30
+      tolerations:
+        - {key: node.kubernetes.io/not-ready, operator: Exists, effect: NoExecute, tolerationSeconds: 30}
+        - {key: node.kubernetes.io/unreachable, operator: Exists, effect: NoExecute, tolerationSeconds: 30}
       securityContext:
         runAsNonRoot: true
         seccompProfile: {type: RuntimeDefault}
@@ -32,6 +35,10 @@ spec:
       containers:
         - name: web
           image: ghcr.io/emil2245/propuestas-web
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "10"]
           ports:
             - {name: http, containerPort: 8080}
           readinessProbe:

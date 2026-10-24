@@ -21,7 +21,7 @@ labels:
 configMapGenerator:
   - name: propuestas-api-config
     literals:
-      - JWT_ISSUER=https://propuestas.example.invalid
+      - JWT_ISSUER=https://propuestas-api.local
       - CORS_ORIGINS=https://propuestas.example.invalid
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy.monitoring.svc:4317
       - OTEL_SDK_DISABLED=false
