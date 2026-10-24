@@ -11,12 +11,22 @@ configMapGenerator:
     literals:
       - CORS_ORIGINS=http://propuestas.127.0.0.1.sslip.io:8080
       - JWT_ISSUER=https://propuestas.local
+      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=local
 patches:
   - target: {kind: Ingress, name: propuestas}
     patch: |-
       - op: replace
         path: /spec/rules/0/host
         value: propuestas.127.0.0.1.sslip.io
+      - op: add
+        path: /metadata/annotations
+        value:
+          cert-manager.io/cluster-issuer: local-ca
+      - op: add
+        path: /spec/tls
+        value:
+          - hosts: [propuestas.127.0.0.1.sslip.io]
+            secretName: propuestas-tls
   - target: {kind: Deployment, name: "propuestas-.*"}
     patch: |-
       - op: add

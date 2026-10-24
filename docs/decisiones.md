@@ -22,6 +22,28 @@
 ## Notas de implementación
 
 - Versiones fijadas: k3s `v1.37.1-k3s1`, Argo CD chart `10.11.1`, chart `cloudnative-pg` `0.29.1`, PostgreSQL `ghcr.io/cloudnative-pg/postgresql:18.6`.
+- Plan 009, charts de plataforma (Application por directorio, `values.yaml` junto a cada una, multi-source `$values` de Argo CD):
+
+  | Chart | Repo | Versión | Namespace | Wave |
+  |---|---|---|---|---|
+  | `cert-manager` | https://charts.jetstack.io | `v1.21.3` | cert-manager | -10 |
+  | `sealed-secrets` | https://bitnami.github.io/sealed-secrets (el antiguo `bitnami-labs.github.io` da 404) | `2.20.0` (controller 0.40.0) | kube-system | -10 |
+  | `kube-prometheus-stack` | https://prometheus-community.github.io/helm-charts | `92.11.0` | monitoring | -5 |
+  | `loki` (SingleBinary, filesystem, sin gateway: `svc/loki:3100`) | https://grafana.github.io/helm-charts | `7.5.0` | monitoring | -4 |
+  | `tempo` (single binary; **chart marcado deprecated** upstream, se mantiene por el plan; migrar a `tempo-distributed`/Alloy en el futuro) | https://grafana.github.io/helm-charts | `1.24.4` | monitoring | -4 |
+  | `alloy` (DaemonSet, Service `alloy` :4317/:4318) | https://grafana.github.io/helm-charts | `1.14.3` | monitoring | -3 |
+
+  Issuers (`k8s/platform/issuers/manifests`, wave -5) y dashboard (`k8s/platform/dashboards/manifests`, wave -4) son Applications de ruta git. En prod, `kube-prometheus-stack` suma `values-prod.yaml` mediante un parche en `k8s/platform/prod/kustomization.yaml`. `kubeseal` v0.40.0 se instala con `scripts/install-tools.sh`.
+
+  | Pilar | Evidencia (cluster vivo) |
+  |---|---|
+  | TLS | `kubectl -n propuestas get certificate` -> `propuestas-tls READY True` |
+  | Métricas | Prometheus `up{namespace="propuestas"}` = 1; dashboard `Propuestas - Resumen` en Grafana |
+  | Logs | Loki `{namespace="propuestas",container="api"}` devuelve líneas |
+  | Trazas | Tempo `/api/search?tags=service.name%3Dpropuestas-api`; mismo `traceId` en Loki con `\|=` |
+  | Secretos | `kubectl -n scratch get secret propuestas-jwt` tras aplicar un SealedSecret |
+
+  Estado: manifiestos validados offline (`scripts/validate.sh`, `helm template`); verificación en cluster pendiente.
 - Argo CD / Kustomize: una `kustomization.yaml` solo puede referenciar archivos dentro de su directorio, por eso cada Application vive en su propio directorio (`k8s/platform/cnpg-operator/`, `k8s/apps/propuestas-<env>/`).
 
 ## Runtime local: k3d (primario) y requisito de podman rootless

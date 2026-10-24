@@ -1,0 +1,69 @@
+# Dimensionado para laptop (k3d). Prod puede usar values propios (ver docs/decisiones.md).
+fullnameOverride: ""
+prometheus:
+  prometheusSpec:
+    retention: 3d
+    resources:
+      requests: {cpu: 100m, memory: 512Mi}
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    probeSelectorNilUsesHelmValues: false
+    enableRemoteWriteReceiver: true   # Tempo metrics-generator empuja service graphs
+alertmanager:
+  enabled: true
+  alertmanagerSpec:
+    resources:
+      requests: {cpu: 25m, memory: 64Mi}
+# k3s no expone estos componentes
+kubeEtcd: {enabled: false}
+kubeControllerManager: {enabled: false}
+kubeScheduler: {enabled: false}
+kubeProxy: {enabled: false}
+grafana:
+  # adminPassword NO se define: el chart genera el Secret kube-prometheus-stack-grafana
+  resources:
+    requests: {cpu: 50m, memory: 128Mi}
+  sidecar:
+    dashboards:
+      enabled: true
+      searchNamespace: ALL
+      label: grafana_dashboard
+      labelValue: "1"
+    datasources:
+      enabled: true
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    annotations:
+      cert-manager.io/cluster-issuer: local-ca   # prod: ver parche en Application/overlay prod (letsencrypt-prod)
+    hosts: [grafana.127.0.0.1.sslip.io]
+    tls:
+      - secretName: grafana-tls
+        hosts: [grafana.127.0.0.1.sslip.io]
+  additionalDataSources:
+    - name: Loki
+      uid: loki
+      type: loki
+      access: proxy
+      url: http://loki.monitoring.svc:3100
+      jsonData:
+        derivedFields:
+          - name: traceId
+            matcherRegex: '"traceId":"(\w+)"'
+            datasourceUid: tempo
+            url: '$${__value.raw}'
+    - name: Tempo
+      uid: tempo
+      type: tempo
+      access: proxy
+      url: http://tempo.monitoring.svc:3200
+      jsonData:
+        tracesToLogsV2:
+          datasourceUid: loki
+          filterByTraceID: true
+          filterBySpanID: false
+        serviceMap:
+          datasourceUid: prometheus
+        nodeGraph:
+          enabled: true
