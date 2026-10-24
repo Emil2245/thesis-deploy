@@ -1,0 +1,7 @@
+# pod  runAsNonRoot(pod)  runAsNonRoot(containers)
+propuestas-api-d9998f7d5-f6dpw    true
+propuestas-api-d9998f7d5-k7llb    true
+propuestas-db-1  true  true
+propuestas-db-2  true  true
+propuestas-web-7d68f676c4-5vkz4  true  true
+propuestas-web-7d68f676c4-7mw2p  true  true

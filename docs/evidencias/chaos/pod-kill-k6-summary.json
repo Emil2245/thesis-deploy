@@ -1,0 +1,140 @@
+{
+    "metrics": {
+        "http_reqs": {
+            "count": 4749,
+            "rate": 26.253023897859933
+        },
+        "bad_status": {
+            "count": 4,
+            "rate": 0.022112464853956567
+        },
+        "vus": {
+            "value": 10,
+            "min": 10,
+            "max": 10
+        },
+        "http_req_tls_handshaking": {
+            "p(95)": 0,
+            "avg": 0.026131327858496527,
+            "min": 0,
+            "med": 0,
+            "max": 18.731314,
+            "p(90)": 0
+        },
+        "vus_max": {
+            "value": 10,
+            "min": 10,
+            "max": 10
+        },
+        "http_req_waiting": {
+            "avg": 26.05779267403668,
+            "min": 1.651129,
+            "med": 12.83504,
+            "max": 2028.683963,
+            "p(90)": 35.003370399999994,
+            "p(95)": 50.60394319999999
+        },
+        "http_req_receiving": {
+            "min": 0.028754,
+            "med": 0.233237,
+            "max": 46.769912,
+            "p(90)": 0.6816305999999999,
+            "p(95)": 0.7569875999999998,
+            "avg": 0.4182248833438613
+        },
+        "http_req_failed": {
+            "passes": 4,
+            "fails": 4745,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0.0008422825858075384
+        },
+        "http_req_connecting": {
+            "min": 0,
+            "med": 0,
+            "max": 1.2648,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0.0018361086544535692
+        },
+        "data_received": {
+            "count": 9921428,
+            "rate": 54846.80698776515
+        },
+        "iteration_duration": {
+            "avg": 379.32547856845054,
+            "min": 207.32206,
+            "med": 372.20787099999995,
+            "max": 2356.939399,
+            "p(90)": 492.29278070000004,
+            "p(95)": 508.1485419
+        },
+        "http_req_blocked": {
+            "p(95)": 0.0015705999999999995,
+            "avg": 0.087877197515266,
+            "min": 0.000277,
+            "med": 0.000739,
+            "max": 283.51725,
+            "p(90)": 0.0013383999999999996
+        },
+        "http_req_duration{expected_response:true}": {
+            "p(95)": 51.85998020000005,
+            "avg": 26.58577695637515,
+            "min": 4.862682,
+            "med": 13.27415,
+            "max": 2029.307504,
+            "p(90)": 35.6171602
+        },
+        "data_sent": {
+            "count": 274628,
+            "rate": 1518.175499478096
+        },
+        "checks": {
+            "passes": 4744,
+            "fails": 4,
+            "value": 0.9991575400168492
+        },
+        "iterations": {
+            "count": 4748,
+            "rate": 26.247495781646446
+        },
+        "http_req_duration": {
+            "min": 1.729422,
+            "med": 13.259693,
+            "max": 2029.307504,
+            "p(90)": 35.614447399999996,
+            "p(95)": 51.800733399999835,
+            "avg": 26.568914699936848,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "http_req_sending": {
+            "min": 0.023821,
+            "med": 0.090302,
+            "max": 1.151581,
+            "p(90)": 0.1447244,
+            "p(95)": 0.1590926,
+            "avg": 0.09289714255632768
+        }
+    },
+    "setup_data": {
+        "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwczovL3Byb3B1ZXN0YXMtYXBpLmxvY2FsIiwidXBuIjoiam9obkB1Y2UuZWR1LmVjIiwiZ3JvdXBzIjpbIlVTVUFSSU8iXSwiaWF0IjoxNzkyODI1OTMwLCJleHAiOjE3OTI4Mjk1MzAsImp0aSI6IjcxYjdjMWRmLTcxNDktNGY2MS05ODA2LTU2NDFiMDFmMWExNiJ9.A8cnbfBdEXDwpc7juU-qJONomzNVrImXesYA9lAKDlfikcFhrg8Wo4ItsNWQz4R57ZN1NZG_oB9UGK3muVZq6_XsuGwtaEk9sa9F9cTsCMuux05ZBYQyCRfdMmAXDyZM_d8JaOCWQZJxLjhfhJCAAJ9kXmXfwlrAxEcQVL-KltTPb6G_X4V6kYv1kXBN1cMocvf__DqhbXOLgEYzMB_o82Qo5de7DHWubgMZc6nSK3qaTOYadajKwEIqpHGWxQb9LTTrp4VdbxAYwDBG87NcYdisPs6syIuOtjgA_-cKSNBBHPAD_vxhnrQgMQOX9S8xpqw3tC3Hqv7EPC8WmN9WBQ"
+    },
+    "root_group": {
+        "checks": {
+            "status esperado": {
+                "name": "status esperado",
+                "path": "::status esperado",
+                "id": "55ecf1181ed7abcfe1940bc12b453999",
+                "passes": 4744,
+                "fails": 4
+            }
+        },
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {}
+    }
+}

@@ -1,0 +1,20 @@
+== overlay local
+Summary: 17 resources found parsing stdin - Valid: 17, Invalid: 0, Errors: 0, Skipped: 0
+== overlay lab
+Summary: 17 resources found parsing stdin - Valid: 17, Invalid: 0, Errors: 0, Skipped: 0
+== overlay prod
+Summary: 18 resources found parsing stdin - Valid: 18, Invalid: 0, Errors: 0, Skipped: 0
+== platform local
+Summary: 10 resources found parsing stdin - Valid: 10, Invalid: 0, Errors: 0, Skipped: 0
+== platform lab
+Summary: 11 resources found parsing stdin - Valid: 11, Invalid: 0, Errors: 0, Skipped: 0
+== platform prod
+Summary: 10 resources found parsing stdin - Valid: 10, Invalid: 0, Errors: 0, Skipped: 0
+== platform/issuers/manifests
+Summary: 5 resources found parsing stdin - Valid: 5, Invalid: 0, Errors: 0, Skipped: 0
+== platform/dashboards/manifests
+Summary: 1 resource found parsing stdin - Valid: 1, Invalid: 0, Errors: 0, Skipped: 0
+== platform/tunnel/manifests
+Summary: 2 resources found parsing stdin - Valid: 2, Invalid: 0, Errors: 0, Skipped: 0
+== dashboard JSON
+dashboard JSON OK

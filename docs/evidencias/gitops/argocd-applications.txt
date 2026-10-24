@@ -1,0 +1,13 @@
+NAME                    SYNC STATUS   HEALTH STATUS
+alloy                   Synced        Healthy
+cert-manager            Synced        Healthy
+cnpg-operator           Synced        Healthy
+dashboards              Synced        Healthy
+issuers                 Synced        Degraded
+kube-prometheus-stack   Synced        Healthy
+loki                    Synced        Healthy
+propuestas              Synced        Healthy
+root                    Synced        Healthy
+sealed-secrets          Synced        Healthy
+tempo                   Synced        Healthy
+tunnel                  Synced        Healthy

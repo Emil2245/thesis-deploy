@@ -1,0 +1,44 @@
+[
+    {
+        "deployStartedAt": "2026-10-24T06:20:01Z",
+        "deployedAt": "2026-10-24T06:21:18Z",
+        "id": 0,
+        "initiatedBy": {
+            "automated": true
+        },
+        "revision": "35a235aa56d4f29da129fac8ee1516f029b8799d",
+        "source": {
+            "path": "k8s/propuestas/overlays/lab",
+            "repoURL": "https://github.com/emil2245/thesis-deploy",
+            "targetRevision": "main"
+        }
+    },
+    {
+        "deployStartedAt": "2026-10-24T06:38:45Z",
+        "deployedAt": "2026-10-24T06:38:47Z",
+        "id": 1,
+        "initiatedBy": {
+            "automated": true
+        },
+        "revision": "33fd212d82750e6ade8919aad9e57ede9253eea2",
+        "source": {
+            "path": "k8s/propuestas/overlays/lab",
+            "repoURL": "https://github.com/emil2245/thesis-deploy",
+            "targetRevision": "main"
+        }
+    },
+    {
+        "deployStartedAt": "2026-10-24T06:41:00Z",
+        "deployedAt": "2026-10-24T06:41:01Z",
+        "id": 2,
+        "initiatedBy": {
+            "automated": true
+        },
+        "revision": "bda14cf7a40deb19ad26f6ccde78f656b9721ee8",
+        "source": {
+            "path": "k8s/propuestas/overlays/lab",
+            "repoURL": "https://github.com/emil2245/thesis-deploy",
+            "targetRevision": "main"
+        }
+    }
+]

@@ -1,0 +1,10 @@
+2026-10-24T07:12:39Z delete pod/propuestas-api-d9998f7d5-nk2wd
+pod "propuestas-api-d9998f7d5-nk2wd" deleted from propuestas namespace
+2026-10-24T07:13:10Z delete pod/propuestas-api-d9998f7d5-9bv2v
+pod "propuestas-api-d9998f7d5-9bv2v" deleted from propuestas namespace
+2026-10-24T07:13:40Z delete pod/propuestas-api-d9998f7d5-fxfln
+pod "propuestas-api-d9998f7d5-fxfln" deleted from propuestas namespace
+2026-10-24T07:14:10Z delete pod/propuestas-api-d9998f7d5-cj5kq
+pod "propuestas-api-d9998f7d5-cj5kq" deleted from propuestas namespace
+2026-10-24T07:14:40Z delete pod/propuestas-web-7d68f676c4-xksbn
+pod "propuestas-web-7d68f676c4-xksbn" deleted from propuestas namespace

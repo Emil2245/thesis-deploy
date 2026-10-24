@@ -1,0 +1,2 @@
+NAME            AGE   INSTANCES   READY   STATUS                     PRIMARY
+propuestas-db   99m   2           2       Cluster in healthy state   propuestas-db-2

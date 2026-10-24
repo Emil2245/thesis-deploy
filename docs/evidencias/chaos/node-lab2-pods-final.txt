@@ -1,0 +1,11 @@
+NAME                              READY   STATUS        RESTARTS        AGE     IP           NODE        NOMINATED NODE   READINESS GATES
+propuestas-api-d9998f7d5-4ch6q    1/1     Running       0               3m6s    10.42.0.23   k3s-lab-1   <none>           <none>
+propuestas-api-d9998f7d5-bm62g    1/1     Running       0               3m6s    10.42.1.47   k3s-lab-2   <none>           <none>
+propuestas-api-d9998f7d5-c5fqn    1/1     Terminating   0               3m6s    10.42.2.41   k3s-lab-3   <none>           <none>
+propuestas-api-d9998f7d5-f6dpw    1/1     Running       0               15m     10.42.0.20   k3s-lab-1   <none>           <none>
+propuestas-api-d9998f7d5-k7llb    1/1     Running       1 (3m33s ago)   12m     10.42.1.38   k3s-lab-2   <none>           <none>
+propuestas-api-d9998f7d5-sd5nw    1/1     Running       0               6m21s   10.42.2.40   k3s-lab-3   <none>           <none>
+propuestas-db-1                   1/1     Running       0               62m     10.42.2.14   k3s-lab-3   <none>           <none>
+propuestas-db-2                   1/1     Running       1 (3m33s ago)   59m     10.42.1.46   k3s-lab-2   <none>           <none>
+propuestas-web-7d68f676c4-5vkz4   1/1     Running       1 (3m33s ago)   11m     10.42.1.39   k3s-lab-2   <none>           <none>
+propuestas-web-7d68f676c4-7mw2p   1/1     Running       0               55m     10.42.2.18   k3s-lab-3   <none>           <none>

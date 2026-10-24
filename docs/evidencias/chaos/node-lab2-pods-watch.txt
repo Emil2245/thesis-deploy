@@ -1,0 +1,138 @@
+2026-10-24T07:18:54Z propuestas-api-d9998f7d5-f6dpw    1/1   Running   0     8m30s   10.42.0.20   k3s-lab-1   <none>   <none>
+2026-10-24T07:18:54Z propuestas-api-d9998f7d5-k7llb    1/1   Running   0     5m44s   10.42.1.30   k3s-lab-2   <none>   <none>
+2026-10-24T07:18:54Z propuestas-db-1                   1/1   Running   0     55m     10.42.2.14   k3s-lab-3   <none>   <none>
+2026-10-24T07:18:54Z propuestas-db-2                   1/1   Running   0     52m     10.42.1.20   k3s-lab-2   <none>   <none>
+2026-10-24T07:18:54Z propuestas-web-7d68f676c4-5vkz4   1/1   Running   0     4m14s   10.42.1.32   k3s-lab-2   <none>   <none>
+2026-10-24T07:18:54Z propuestas-web-7d68f676c4-7mw2p   1/1   Running   0     48m     10.42.2.18   k3s-lab-3   <none>   <none>
+2026-10-24T07:19:35Z propuestas-api-d9998f7d5-sd5nw    0/1   Pending   0     0s      <none>       <none>      <none>   <none>
+2026-10-24T07:19:35Z propuestas-api-d9998f7d5-sd5nw    0/1   Pending   0     0s      <none>       k3s-lab-3   <none>   <none>
+2026-10-24T07:19:35Z propuestas-api-d9998f7d5-sd5nw    0/1   ContainerCreating   0     0s      <none>       k3s-lab-3   <none>   <none>
+2026-10-24T07:19:36Z propuestas-api-d9998f7d5-sd5nw    0/1   ContainerCreating   0     1s      <none>       k3s-lab-3   <none>   <none>
+2026-10-24T07:19:36Z propuestas-api-d9998f7d5-sd5nw    0/1   Running             0     1s      10.42.2.40   k3s-lab-3   <none>   <none>
+2026-10-24T07:19:40Z propuestas-api-d9998f7d5-sd5nw    0/1   Running             0     5s      10.42.2.40   k3s-lab-3   <none>   <none>
+2026-10-24T07:19:46Z propuestas-api-d9998f7d5-sd5nw    0/1   Running             0     11s     10.42.2.40   k3s-lab-3   <none>   <none>
+2026-10-24T07:19:46Z propuestas-api-d9998f7d5-sd5nw    1/1   Running             0     11s     10.42.2.40   k3s-lab-3   <none>   <none>
+2026-10-24T07:20:29Z propuestas-api-d9998f7d5-k7llb    1/1   Running             0     7m19s   10.42.1.30   k3s-lab-2   <none>   <none>
+2026-10-24T07:20:29Z propuestas-db-2                   1/1   Running             0     54m     10.42.1.20   k3s-lab-2   <none>   <none>
+2026-10-24T07:20:29Z propuestas-web-7d68f676c4-5vkz4   1/1   Running             0     5m49s   10.42.1.32   k3s-lab-2   <none>   <none>
+2026-10-24T07:22:25Z propuestas-db-2                   0/1   Unknown             0     56m     <none>       k3s-lab-2   <none>   <none>
+2026-10-24T07:22:26Z propuestas-web-7d68f676c4-5vkz4   0/1   Unknown             0     7m46s   <none>       k3s-lab-2   <none>   <none>
+2026-10-24T07:22:26Z propuestas-api-d9998f7d5-k7llb    0/1   Unknown             0     9m16s   <none>       k3s-lab-2   <none>   <none>
+2026-10-24T07:22:28Z propuestas-web-7d68f676c4-5vkz4   0/1   Unknown             0     7m48s   <none>       k3s-lab-2   <none>   <none>
+2026-10-24T07:22:29Z propuestas-api-d9998f7d5-k7llb    0/1   Unknown             0     9m19s   <none>       k3s-lab-2   <none>   <none>
+2026-10-24T07:22:29Z propuestas-db-2                   0/1   Unknown             0     56m     <none>       k3s-lab-2   <none>   <none>
+2026-10-24T07:22:30Z propuestas-api-d9998f7d5-k7llb    0/1   Running             1 (7s ago)   9m20s   10.42.1.38   k3s-lab-2   <none>   <none>
+2026-10-24T07:22:30Z propuestas-web-7d68f676c4-5vkz4   0/1   Running             1 (7s ago)   7m50s   10.42.1.39   k3s-lab-2   <none>   <none>
+2026-10-24T07:22:31Z propuestas-db-2                   0/1   Unknown             0            56m     10.42.1.46   k3s-lab-2   <none>   <none>
+2026-10-24T07:22:32Z propuestas-web-7d68f676c4-5vkz4   1/1   Running             1 (9s ago)   7m52s   10.42.1.39   k3s-lab-2   <none>   <none>
+2026-10-24T07:22:33Z propuestas-db-2                   0/1   Unknown             0            56m     10.42.1.46   k3s-lab-2   <none>   <none>
+2026-10-24T07:22:35Z propuestas-db-2                   0/1   Unknown             0            56m     10.42.1.46   k3s-lab-2   <none>   <none>
+2026-10-24T07:22:36Z propuestas-db-2                   0/1   Running             1 (13s ago)   56m     10.42.1.46   k3s-lab-2   <none>   <none>
+2026-10-24T07:22:43Z propuestas-db-2                   0/1   Running             1 (20s ago)   56m     10.42.1.46   k3s-lab-2   <none>   <none>
+2026-10-24T07:22:44Z propuestas-db-2                   1/1   Running             1 (21s ago)   56m     10.42.1.46   k3s-lab-2   <none>   <none>
+2026-10-24T07:22:50Z propuestas-api-d9998f7d5-c5fqn    0/1   Pending             0             0s      <none>       <none>      <none>   <none>
+2026-10-24T07:22:50Z propuestas-api-d9998f7d5-bm62g    0/1   Pending             0             0s      <none>       <none>      <none>   <none>
+2026-10-24T07:22:50Z propuestas-api-d9998f7d5-4ch6q    0/1   Pending             0             0s      <none>       <none>      <none>   <none>
+2026-10-24T07:22:50Z propuestas-api-d9998f7d5-c5fqn    0/1   Pending             0             0s      <none>       k3s-lab-3   <none>   <none>
+2026-10-24T07:22:50Z propuestas-api-d9998f7d5-bm62g    0/1   Pending             0             0s      <none>       k3s-lab-2   <none>   <none>
+2026-10-24T07:22:50Z propuestas-api-d9998f7d5-4ch6q    0/1   Pending             0             0s      <none>       k3s-lab-1   <none>   <none>
+2026-10-24T07:22:50Z propuestas-api-d9998f7d5-bm62g    0/1   ContainerCreating   0             1s      <none>       k3s-lab-2   <none>   <none>
+2026-10-24T07:22:50Z propuestas-api-d9998f7d5-c5fqn    0/1   ContainerCreating   0             1s      <none>       k3s-lab-3   <none>   <none>
+2026-10-24T07:22:51Z propuestas-api-d9998f7d5-4ch6q    0/1   ContainerCreating   0             1s      <none>       k3s-lab-1   <none>   <none>
+2026-10-24T07:22:51Z propuestas-api-d9998f7d5-bm62g    0/1   ContainerCreating   0             1s      <none>       k3s-lab-2   <none>   <none>
+2026-10-24T07:22:51Z propuestas-api-d9998f7d5-c5fqn    0/1   ContainerCreating   0             1s      <none>       k3s-lab-3   <none>   <none>
+2026-10-24T07:22:51Z propuestas-api-d9998f7d5-4ch6q    0/1   ContainerCreating   0             2s      <none>       k3s-lab-1   <none>   <none>
+2026-10-24T07:22:52Z propuestas-api-d9998f7d5-c5fqn    0/1   Running             0             2s      10.42.2.41   k3s-lab-3   <none>   <none>
+2026-10-24T07:22:52Z propuestas-api-d9998f7d5-bm62g    0/1   Running             0             2s      10.42.1.47   k3s-lab-2   <none>   <none>
+2026-10-24T07:22:52Z propuestas-api-d9998f7d5-4ch6q    0/1   Running             0             2s      10.42.0.23   k3s-lab-1   <none>   <none>
+2026-10-24T07:22:56Z propuestas-api-d9998f7d5-bm62g    0/1   Running             0             6s      10.42.1.47   k3s-lab-2   <none>   <none>
+2026-10-24T07:22:56Z propuestas-api-d9998f7d5-4ch6q    0/1   Running             0             6s      10.42.0.23   k3s-lab-1   <none>   <none>
+2026-10-24T07:22:56Z propuestas-api-d9998f7d5-c5fqn    0/1   Running             0             6s      10.42.2.41   k3s-lab-3   <none>   <none>
+2026-10-24T07:22:56Z propuestas-api-d9998f7d5-k7llb    0/1   Running             1 (33s ago)   9m46s   10.42.1.38   k3s-lab-2   <none>   <none>
+2026-10-24T07:22:57Z propuestas-api-d9998f7d5-k7llb    1/1   Running             1 (34s ago)   9m47s   10.42.1.38   k3s-lab-2   <none>   <none>
+2026-10-24T07:23:11Z propuestas-api-d9998f7d5-4ch6q    0/1   Running             0             21s     10.42.0.23   k3s-lab-1   <none>   <none>
+2026-10-24T07:23:11Z propuestas-api-d9998f7d5-4ch6q    1/1   Running             0             21s     10.42.0.23   k3s-lab-1   <none>   <none>
+2026-10-24T07:23:16Z propuestas-api-d9998f7d5-bm62g    0/1   Running             0             26s     10.42.1.47   k3s-lab-2   <none>   <none>
+2026-10-24T07:23:16Z propuestas-api-d9998f7d5-bm62g    1/1   Running             0             26s     10.42.1.47   k3s-lab-2   <none>   <none>
+2026-10-24T07:23:16Z propuestas-api-d9998f7d5-c5fqn    0/1   Running             0             26s     10.42.2.41   k3s-lab-3   <none>   <none>
+2026-10-24T07:23:16Z propuestas-api-d9998f7d5-c5fqn    1/1   Running             0             26s     10.42.2.41   k3s-lab-3   <none>   <none>
+2026-10-24T07:25:50Z propuestas-api-d9998f7d5-c5fqn    1/1   Terminating         0             3m      10.42.2.41   k3s-lab-3   <none>   <none>
+2026-10-24T07:25:50Z propuestas-api-d9998f7d5-c5fqn    1/1   Terminating         0             3m1s    10.42.2.41   k3s-lab-3   <none>   <none>
+2026-10-24T07:25:56Z propuestas-api-d9998f7d5-c5fqn    0/1   Error               0             3m6s    10.42.2.41   k3s-lab-3   <none>   <none>
+2026-10-24T07:25:56Z propuestas-api-d9998f7d5-c5fqn    0/1   Error               0             3m6s    10.42.2.41   k3s-lab-3   <none>   <none>
+2026-10-24T07:25:56Z propuestas-api-d9998f7d5-c5fqn    0/1   Error               0             3m6s    10.42.2.41   k3s-lab-3   <none>   <none>
+2026-10-24T07:25:56Z propuestas-api-d9998f7d5-c5fqn    0/1   Error               0             3m6s    10.42.2.41   k3s-lab-3   <none>   <none>
+2026-10-24T07:26:05Z propuestas-api-d9998f7d5-4ch6q    1/1   Terminating         0             3m16s   10.42.0.23   k3s-lab-1   <none>   <none>
+2026-10-24T07:26:06Z propuestas-api-d9998f7d5-4ch6q    1/1   Terminating         0             3m16s   10.42.0.23   k3s-lab-1   <none>   <none>
+2026-10-24T07:26:11Z propuestas-api-d9998f7d5-4ch6q    0/1   Error               0             3m21s   10.42.0.23   k3s-lab-1   <none>   <none>
+2026-10-24T07:26:11Z propuestas-api-d9998f7d5-4ch6q    0/1   Error               0             3m21s   10.42.0.23   k3s-lab-1   <none>   <none>
+2026-10-24T07:26:11Z propuestas-api-d9998f7d5-4ch6q    0/1   Error               0             3m21s   10.42.0.23   k3s-lab-1   <none>   <none>
+2026-10-24T07:26:11Z propuestas-api-d9998f7d5-4ch6q    0/1   Error               0             3m21s   10.42.0.23   k3s-lab-1   <none>   <none>
+2026-10-24T07:26:51Z propuestas-api-d9998f7d5-bm62g    1/1   Terminating         0             4m1s    10.42.1.47   k3s-lab-2   <none>   <none>
+2026-10-24T07:26:51Z propuestas-api-d9998f7d5-bm62g    1/1   Terminating         0             4m1s    10.42.1.47   k3s-lab-2   <none>   <none>
+2026-10-24T07:26:56Z propuestas-api-d9998f7d5-bm62g    0/1   Error               0             4m6s    10.42.1.47   k3s-lab-2   <none>   <none>
+2026-10-24T07:26:56Z propuestas-api-d9998f7d5-bm62g    0/1   Error               0             4m6s    10.42.1.47   k3s-lab-2   <none>   <none>
+2026-10-24T07:26:56Z propuestas-api-d9998f7d5-bm62g    0/1   Error               0             4m6s    10.42.1.47   k3s-lab-2   <none>   <none>
+2026-10-24T07:27:06Z propuestas-api-d9998f7d5-k7llb    1/1   Terminating         1 (4m43s ago)   13m     10.42.1.38   k3s-lab-2   <none>   <none>
+2026-10-24T07:27:06Z propuestas-api-d9998f7d5-k7llb    1/1   Terminating         1 (4m43s ago)   13m     10.42.1.38   k3s-lab-2   <none>   <none>
+2026-10-24T07:27:11Z propuestas-api-d9998f7d5-k7llb    0/1   Error               1 (4m48s ago)   14m     10.42.1.38   k3s-lab-2   <none>   <none>
+2026-10-24T07:27:11Z propuestas-api-d9998f7d5-k7llb    0/1   Error               1 (4m48s ago)   14m     10.42.1.38   k3s-lab-2   <none>   <none>
+2026-10-24T07:27:11Z propuestas-api-d9998f7d5-k7llb    0/1   Error               1 (4m48s ago)   14m     10.42.1.38   k3s-lab-2   <none>   <none>
+2026-10-24T07:27:11Z propuestas-api-d9998f7d5-k7llb    0/1   Error               1 (4m48s ago)   14m     10.42.1.38   k3s-lab-2   <none>   <none>
+2026-10-24T07:35:26Z propuestas-api-d9998f7d5-f6dpw    0/1   Running             0               25m     10.42.0.20   k3s-lab-1   <none>   <none>
+2026-10-24T07:36:04Z propuestas-api-d9998f7d5-sd5nw    1/1   Running             0               16m     10.42.2.40   k3s-lab-3   <none>   <none>
+2026-10-24T07:36:04Z propuestas-web-7d68f676c4-7mw2p   1/1   Running             0               66m     10.42.2.18   k3s-lab-3   <none>   <none>
+2026-10-24T07:36:04Z propuestas-db-1                   1/1   Running             0               72m     10.42.2.14   k3s-lab-3   <none>   <none>
+2026-10-24T07:38:44Z propuestas-db-1                   0/1   Unknown             0               74m     <none>       k3s-lab-3   <none>   <none>
+2026-10-24T07:38:44Z propuestas-api-d9998f7d5-sd5nw    0/1   Unknown             0               19m     <none>       k3s-lab-3   <none>   <none>
+2026-10-24T07:38:44Z propuestas-web-7d68f676c4-7mw2p   0/1   Unknown             0               68m     <none>       k3s-lab-3   <none>   <none>
+2026-10-24T07:38:45Z propuestas-web-7d68f676c4-7mw2p   0/1   Unknown             0               68m     <none>       k3s-lab-3   <none>   <none>
+2026-10-24T07:38:46Z propuestas-api-d9998f7d5-sd5nw    0/1   Unknown             0               19m     <none>       k3s-lab-3   <none>   <none>
+2026-10-24T07:38:46Z propuestas-db-1                   0/1   Unknown             0               74m     <none>       k3s-lab-3   <none>   <none>
+2026-10-24T07:38:46Z propuestas-web-7d68f676c4-7mw2p   0/1   Running             1 (3s ago)      68m     10.42.2.44   k3s-lab-3   <none>   <none>
+2026-10-24T07:38:47Z propuestas-api-d9998f7d5-sd5nw    0/1   Running             1 (4s ago)      19m     10.42.2.48   k3s-lab-3   <none>   <none>
+2026-10-24T07:38:47Z propuestas-web-7d68f676c4-7mw2p   1/1   Running             1 (4s ago)      68m     10.42.2.44   k3s-lab-3   <none>   <none>
+2026-10-24T07:38:47Z propuestas-db-1                   0/1   Unknown             0               74m     10.42.2.52   k3s-lab-3   <none>   <none>
+2026-10-24T07:38:49Z propuestas-db-1                   0/1   Unknown             0               74m     10.42.2.52   k3s-lab-3   <none>   <none>
+2026-10-24T07:38:49Z propuestas-db-1                   0/1   Running             1 (6s ago)      74m     10.42.2.52   k3s-lab-3   <none>   <none>
+2026-10-24T07:38:50Z propuestas-db-1                   0/1   Running             1 (7s ago)      74m     10.42.2.52   k3s-lab-3   <none>   <none>
+2026-10-24T07:38:58Z propuestas-db-1                   0/1   Running             1 (15s ago)     75m     10.42.2.52   k3s-lab-3   <none>   <none>
+2026-10-24T07:38:58Z propuestas-db-1                   1/1   Running             1 (15s ago)     75m     10.42.2.52   k3s-lab-3   <none>   <none>
+2026-10-24T07:39:02Z propuestas-api-d9998f7d5-f6dpw    1/1   Running             0               28m     10.42.0.20   k3s-lab-1   <none>   <none>
+2026-10-24T07:39:03Z propuestas-api-d9998f7d5-sd5nw    0/1   Error               1 (20s ago)     19m     10.42.2.48   k3s-lab-3   <none>   <none>
+2026-10-24T07:39:06Z propuestas-api-d9998f7d5-sd5nw    0/1   CrashLoopBackOff    1 (3s ago)      19m     10.42.2.48   k3s-lab-3   <none>   <none>
+2026-10-24T07:39:15Z propuestas-api-d9998f7d5-sd5nw    0/1   Running             2 (12s ago)     19m     10.42.2.48   k3s-lab-3   <none>   <none>
+2026-10-24T07:39:26Z propuestas-api-d9998f7d5-sd5nw    0/1   Running             2 (23s ago)     19m     10.42.2.48   k3s-lab-3   <none>   <none>
+2026-10-24T07:39:26Z propuestas-api-d9998f7d5-sd5nw    1/1   Running             2 (23s ago)     19m     10.42.2.48   k3s-lab-3   <none>   <none>
+2026-10-24T07:39:36Z propuestas-api-d9998f7d5-jz4jb    0/1   Pending             0               0s      <none>       <none>      <none>   <none>
+2026-10-24T07:39:36Z propuestas-api-d9998f7d5-jz4jb    0/1   Pending             0               0s      <none>       k3s-lab-2   <none>   <none>
+2026-10-24T07:39:36Z propuestas-api-d9998f7d5-8krcr    0/1   Pending             0               0s      <none>       <none>      <none>   <none>
+2026-10-24T07:39:37Z propuestas-api-d9998f7d5-q7mvg    0/1   Pending             0               0s      <none>       <none>      <none>   <none>
+2026-10-24T07:39:37Z propuestas-api-d9998f7d5-bqrsd    0/1   Pending             0               0s      <none>       <none>      <none>   <none>
+2026-10-24T07:39:37Z propuestas-api-d9998f7d5-q7mvg    0/1   Pending             0               0s      <none>       k3s-lab-1   <none>   <none>
+2026-10-24T07:39:37Z propuestas-api-d9998f7d5-8krcr    0/1   Pending             0               0s      <none>       k3s-lab-3   <none>   <none>
+2026-10-24T07:39:37Z propuestas-api-d9998f7d5-bqrsd    0/1   Pending             0               0s      <none>       k3s-lab-2   <none>   <none>
+2026-10-24T07:39:37Z propuestas-api-d9998f7d5-jz4jb    0/1   ContainerCreating   0               0s      <none>       k3s-lab-2   <none>   <none>
+2026-10-24T07:39:37Z propuestas-api-d9998f7d5-8krcr    0/1   ContainerCreating   0               0s      <none>       k3s-lab-3   <none>   <none>
+2026-10-24T07:39:37Z propuestas-api-d9998f7d5-q7mvg    0/1   ContainerCreating   0               0s      <none>       k3s-lab-1   <none>   <none>
+2026-10-24T07:39:37Z propuestas-api-d9998f7d5-bqrsd    0/1   ContainerCreating   0               0s      <none>       k3s-lab-2   <none>   <none>
+2026-10-24T07:39:37Z propuestas-api-d9998f7d5-jz4jb    0/1   ContainerCreating   0               1s      <none>       k3s-lab-2   <none>   <none>
+2026-10-24T07:39:37Z propuestas-api-d9998f7d5-8krcr    0/1   ContainerCreating   0               1s      <none>       k3s-lab-3   <none>   <none>
+2026-10-24T07:39:37Z propuestas-api-d9998f7d5-q7mvg    0/1   ContainerCreating   0               1s      <none>       k3s-lab-1   <none>   <none>
+2026-10-24T07:39:37Z propuestas-api-d9998f7d5-bqrsd    0/1   ContainerCreating   0               1s      <none>       k3s-lab-2   <none>   <none>
+2026-10-24T07:39:38Z propuestas-api-d9998f7d5-jz4jb    0/1   Running             0               2s      10.42.1.49   k3s-lab-2   <none>   <none>
+2026-10-24T07:39:38Z propuestas-api-d9998f7d5-q7mvg    0/1   Running             0               2s      10.42.0.24   k3s-lab-1   <none>   <none>
+2026-10-24T07:39:38Z propuestas-api-d9998f7d5-8krcr    0/1   Running             0               2s      10.42.2.53   k3s-lab-3   <none>   <none>
+2026-10-24T07:39:38Z propuestas-api-d9998f7d5-bqrsd    0/1   Running             0               2s      10.42.1.50   k3s-lab-2   <none>   <none>
+2026-10-24T07:39:42Z propuestas-api-d9998f7d5-jz4jb    0/1   Running             0               6s      10.42.1.49   k3s-lab-2   <none>   <none>
+2026-10-24T07:39:42Z propuestas-api-d9998f7d5-8krcr    0/1   Running             0               6s      10.42.2.53   k3s-lab-3   <none>   <none>
+2026-10-24T07:39:42Z propuestas-api-d9998f7d5-bqrsd    0/1   Running             0               6s      10.42.1.50   k3s-lab-2   <none>   <none>
+2026-10-24T07:39:42Z propuestas-api-d9998f7d5-q7mvg    0/1   Running             0               6s      10.42.0.24   k3s-lab-1   <none>   <none>
+2026-10-24T07:39:52Z propuestas-api-d9998f7d5-q7mvg    0/1   Running             0               16s     10.42.0.24   k3s-lab-1   <none>   <none>
+2026-10-24T07:39:52Z propuestas-api-d9998f7d5-q7mvg    1/1   Running             0               16s     10.42.0.24   k3s-lab-1   <none>   <none>
+2026-10-24T07:40:02Z propuestas-api-d9998f7d5-jz4jb    0/1   Running             0               26s     10.42.1.49   k3s-lab-2   <none>   <none>
+2026-10-24T07:40:02Z propuestas-api-d9998f7d5-jz4jb    1/1   Running             0               26s     10.42.1.49   k3s-lab-2   <none>   <none>
+2026-10-24T07:40:02Z propuestas-api-d9998f7d5-8krcr    0/1   Running             0               26s     10.42.2.53   k3s-lab-3   <none>   <none>
+2026-10-24T07:40:02Z propuestas-api-d9998f7d5-bqrsd    0/1   Running             0               26s     10.42.1.50   k3s-lab-2   <none>   <none>
+2026-10-24T07:40:02Z propuestas-api-d9998f7d5-8krcr    1/1   Running             0               26s     10.42.2.53   k3s-lab-3   <none>   <none>
+2026-10-24T07:40:02Z propuestas-api-d9998f7d5-bqrsd    1/1   Running             0               26s     10.42.1.50   k3s-lab-2   <none>   <none>
