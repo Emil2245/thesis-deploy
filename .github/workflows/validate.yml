@@ -36,7 +36,6 @@ jobs:
 
   iac:
     runs-on: ubuntu-latest
-    if: hashFiles('infra/hetzner/*.tf') != ''
     steps:
       - uses: actions/checkout@v7
       - uses: opentofu/setup-opentofu@v2
