@@ -1,0 +1,14 @@
+NAME                                  READY   STATUS    RESTARTS        AGE     IP           NODE        NOMINATED NODE   READINESS GATES
+pod/propuestas-api-7656545d54-skhbp   1/1     Running   3 (5m58s ago)   8m47s   10.42.0.14   k3s-lab-1   <none>           <none>
+pod/propuestas-api-7656545d54-v5sgj   1/1     Running   2 (6m19s ago)   8m47s   10.42.1.14   k3s-lab-2   <none>           <none>
+pod/propuestas-db-1                   1/1     Running   0               6m12s   10.42.2.14   k3s-lab-3   <none>           <none>
+pod/propuestas-db-2                   1/1     Running   0               3m51s   10.42.1.20   k3s-lab-2   <none>           <none>
+pod/propuestas-web-7d68f676c4-m4v5b   1/1     Running   0               8m47s   10.42.2.11   k3s-lab-3   <none>           <none>
+pod/propuestas-web-7d68f676c4-xksbn   1/1     Running   0               8m47s   10.42.1.15   k3s-lab-2   <none>           <none>
+
+NAME                                                 REFERENCE                   TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/propuestas-api   Deployment/propuestas-api   cpu: 1%/60%   2         6         2          8m47s
+horizontalpodautoscaler.autoscaling/propuestas-web   Deployment/propuestas-web   cpu: 3%/70%   2         4         2          8m47s
+
+NAME                                         READY   SECRET           ISSUER     STATUS                                          AGE
+certificate.cert-manager.io/propuestas-tls   True    propuestas-tls   local-ca   Certificate is up to date and has not expired   8m47s

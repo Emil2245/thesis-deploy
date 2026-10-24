@@ -1,0 +1,5 @@
+== tempo search
+Error from server (NotFound): services "tempo" not found
+
+== note: issuers Application Degraded is expected (Let's Encrypt cannot validate in LAN; local-ca Ready)
+== note: up{propuestas-db-*}=0 (CNPG pod metrics scrape not matching; not investigated)
