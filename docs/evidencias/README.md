@@ -46,20 +46,22 @@ Notas honestas: el 2.62 % de fallos del failover de BD y el 0.19 % del fallo de 
 de deteccion (kubelet marca NotReady a ~48 s; hasta entonces Traefik/endpoints siguen apuntando a pods
 inalcanzables); no se ajustaron HPA ni umbrales. Los reintentos/readiness no se tocaron.
 
-Spans JDBC / panel p95 (plan 020 Paso 5): **omitido**, la imagen del plan 019 aun no se habia publicado (el overlay prod sigue en api `b025a77`). Los hallazgos 3 y 4 siguen abiertos.
+Spans JDBC / panel p95 (plan 020 Paso 5): omitido durante la corrida del plan 020 porque la imagen del plan 019 aun no se habia publicado; se completo despues con la api `77a2e41` (filas de observabilidad de esta tabla). Hallazgos 3 y 4: **cerrados**.
 
 ## Hallazgos que deben constar en la tesis (fallos honestos)
 
+Hallazgos de la corrida v1 (plan 012); se conservan como el "antes" y se anota su estado actual.
+
 1. **Rolling update no es "zero downtime"**: 0.64-0.92 % de peticiones 502 (sin `preStop`/sleep ni
-   `terminationGracePeriod` coordinado con el ingress). No se modificaron manifiestos.
+   `terminationGracePeriod` coordinado con el ingress). No se modificaron manifiestos. → **Corregido en v2** (plan 020: 0 fallos).
 2. **Operador CNPG sin redundancia**: un solo replica del operador; si cae su nodo junto con el
-   primario no hay failover hasta la eviction (5 min). Indisponibilidad total de ~5.6 min.
-3. **Spans JDBC ausentes**: la traza de Tempo contiene un solo span HTTP (`GET/POST ...`); no hay spans de BD.
+   primario no hay failover hasta la eviction (5 min). Indisponibilidad total de ~5.6 min. → **Corregido en v2** (plan 020: operador con 2 replicas, failover 20 s tras NotReady; queda 2.62 % de fallos, PARCIAL).
+3. **Spans JDBC ausentes**: la traza de Tempo contiene un solo span HTTP (`GET/POST ...`); no hay spans de BD. → **Corregido** (plan 019, api `77a2e41`).
 4. **Latencia p95 en Grafana sin datos**: la metrica `http_server_requests_seconds` no exporta buckets de
-   histograma (panel "Latencia p95" vacio). El p95 real viene del resumen de k6.
+   histograma (panel "Latencia p95" vacio). El p95 real viene del resumen de k6. → **Corregido** (plan 019).
 5. **Bug de configuracion corregido durante la prueba** (commit `fix(k8s): align lab JWT_ISSUER with token issuer`):
    con `JWT_ISSUER=https://propuestas.local` todo endpoint autenticado devolvia 401 porque `TokenService`
-   firma con `iss=https://propuestas-api.local` (hardcode). El overlay `local` tiene el mismo valor (sin corregir).
+   firma con `iss=https://propuestas-api.local` (hardcode). El overlay `local` tiene el mismo valor (sin corregir). → **Corregido** (plan 019: el issuer sale de `JWT_ISSUER`; plan 020 unifico el valor en todos los overlays).
 6. Exportes xlsx/pdf del cronograma semilla responden 409 (bloqueo de negocio, desviacion != 0); k6 los cuenta como
    respuesta esperada. No hay ruta de export con 200 en los datos semilla, por lo que la carga CPU-pesada son
    arbol de presupuesto/cronograma (~0.3 s c/u).
