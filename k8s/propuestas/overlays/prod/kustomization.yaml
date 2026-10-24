@@ -20,6 +20,8 @@ configMapGenerator:
   name: propuestas-api-config
       # plan 010 replaces PROD_IP
           # si hay rate limit de Let's Encrypt, probar primero con letsencrypt-staging
+    # plan 010 replaces PROD_IP
+        # si hay rate limit de Let's Encrypt, probar primero con letsencrypt-staging
 patches:
 - patch: |-
     - op: replace
