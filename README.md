@@ -11,7 +11,8 @@ k8s/argocd/                   values de Argo CD y app-of-apps (root-local/prod)
 k8s/platform/                 add-ons (CloudNativePG; plan 009 agrega más)
 k8s/apps/                     Applications de la app por entorno
 k8s/propuestas/{base,overlays/{local,prod}}   manifiestos Kustomize
-scripts/                      install-tools, cluster-local-up/down, build-local-images, bootstrap, validate
+scripts/                      install-tools, cluster-local-up/down, build-local-images, bootstrap, validate, bump-submodules
+.github/workflows/            validate.yml (PR/push), release.yml (build+push GHCR+bump GitOps)
 docs/                         decisiones.md, runbook.md
 ```
 
@@ -28,7 +29,10 @@ scripts/bootstrap.sh local
 App en http://propuestas.127.0.0.1.sslip.io:8080
 
 ## Releases
-Los submódulos fijan la versión de la app: `git submodule update --remote` + commit = nueva release.
+Los submódulos fijan la versión de la app. **Cómo hacer un release:**
+`scripts/bump-submodules.sh` (avanza `apps/*` a `main`, pide confirmación, commitea; `-y` no interactivo) y `git push`.
+`release.yml` construye cada imagen desde el SHA del submódulo, la escanea (Trivy), la publica en GHCR como
+`propuestas-{api,web}:<sha7>` y el bot commitea los tags en `k8s/propuestas/overlays/prod` (`[skip ci]`); Argo CD sincroniza.
 Validar manifiestos: `scripts/validate.sh`.
 
 Decisiones y pilares: [docs/decisiones.md](docs/decisiones.md). Operación: [docs/runbook.md](docs/runbook.md).
