@@ -1,0 +1,6 @@
+version: 2
+ethernets:
+  eth0:
+    match:
+      driver: hv_netvsc
+    dhcp4: true
