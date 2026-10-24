@@ -1,0 +1,10 @@
+# Se suma a values.yaml solo en prod (parche en k8s/platform/prod/kustomization.yaml).
+# TODO plan 010: reemplazar PROD_IP.
+grafana:
+  ingress:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod   # si hay rate limit, probar con letsencrypt-staging
+    hosts: [grafana.PROD_IP.sslip.io]
+    tls:
+      - secretName: grafana-tls
+        hosts: [grafana.PROD_IP.sslip.io]

@@ -1,0 +1,26 @@
+fullnameOverride: tempo
+tempo:
+  retention: 72h
+  resources:
+    requests: {cpu: 50m, memory: 256Mi}
+  memBallastSizeMbs: 256
+  reportingEnabled: false
+  receivers:
+    otlp:
+      protocols:
+        grpc: {endpoint: "0.0.0.0:4317"}
+        http: {endpoint: "0.0.0.0:4318"}
+  metricsGenerator:
+    enabled: true
+    remoteWriteUrl: http://kube-prometheus-stack-prometheus.monitoring.svc:9090/api/v1/write
+    storage:
+      path: /var/tempo/metrics
+    traces_storage:
+      path: /var/tempo/traces
+  overrides:
+    defaults:
+      metrics_generator:
+        processors: [service-graphs, span-metrics]
+persistence:
+  enabled: true
+  size: 5Gi
