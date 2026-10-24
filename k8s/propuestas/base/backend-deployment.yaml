@@ -18,7 +18,10 @@ spec:
       labels:
         app.kubernetes.io/name: propuestas-api
     spec:
-      terminationGracePeriodSeconds: 30
+      terminationGracePeriodSeconds: 40
+      tolerations:
+        - {key: node.kubernetes.io/not-ready, operator: Exists, effect: NoExecute, tolerationSeconds: 30}
+        - {key: node.kubernetes.io/unreachable, operator: Exists, effect: NoExecute, tolerationSeconds: 30}
       securityContext:
         fsGroup: 185
       topologySpreadConstraints:
@@ -31,6 +34,10 @@ spec:
       containers:
         - name: api
           image: ghcr.io/emil2245/propuestas-api
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "10"]
           ports:
             - {name: http, containerPort: 8080}
             - {name: management, containerPort: 9000}

@@ -11,6 +11,16 @@ spec:
     repoURL: https://cloudnative-pg.github.io/charts
     chart: cloudnative-pg
     targetRevision: 0.29.1
+    helm:
+      valuesObject:
+        replicaCount: 2
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: cloudnative-pg
   destination:
     server: https://kubernetes.default.svc
     namespace: cnpg-system
