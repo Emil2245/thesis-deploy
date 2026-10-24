@@ -1,0 +1,136 @@
+{
+    "metrics": {
+        "http_req_duration{expected_response:true}": {
+            "p(95)": 97.04136265,
+            "avg": 47.9683338590647,
+            "min": 6.29208,
+            "med": 15.816053499999999,
+            "max": 3211.817927,
+            "p(90)": 65.02005530000001
+        },
+        "http_req_sending": {
+            "p(95)": 0.16172594999999995,
+            "avg": 0.09258348720776369,
+            "min": 0.026134,
+            "med": 0.070947,
+            "max": 5.79233,
+            "p(90)": 0.1477117
+        },
+        "http_req_duration": {
+            "min": 6.29208,
+            "med": 15.816053499999999,
+            "max": 3211.817927,
+            "p(90)": 65.02005530000001,
+            "p(95)": 97.04136265,
+            "avg": 47.9683338590647,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "http_req_tls_handshaking": {
+            "min": 0,
+            "med": 0,
+            "max": 25.331615,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0.028194719453021613
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 4534,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "iterations": {
+            "count": 4533,
+            "rate": 24.921489039746767
+        },
+        "http_req_receiving": {
+            "p(90)": 0.685048,
+            "p(95)": 0.7775258999999995,
+            "avg": 0.41953226312306957,
+            "min": 0.028151,
+            "med": 0.230433,
+            "max": 58.080991
+        },
+        "checks": {
+            "passes": 4533,
+            "fails": 0,
+            "value": 1
+        },
+        "vus_max": {
+            "max": 10,
+            "value": 10,
+            "min": 10
+        },
+        "http_reqs": {
+            "rate": 24.926986831284324,
+            "count": 4534
+        },
+        "iteration_duration": {
+            "avg": 397.3595238438113,
+            "min": 208.487611,
+            "med": 380.76043,
+            "max": 3539.229206,
+            "p(90)": 500.9865924,
+            "p(95)": 520.9814069999999
+        },
+        "data_received": {
+            "count": 9379635,
+            "rate": 51567.27792837529
+        },
+        "vus": {
+            "value": 10,
+            "min": 0,
+            "max": 10
+        },
+        "http_req_connecting": {
+            "med": 0,
+            "max": 1.189259,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0.0015736473312748128,
+            "min": 0
+        },
+        "http_req_waiting": {
+            "med": 15.326319,
+            "max": 3211.108857,
+            "p(90)": 64.08689590000002,
+            "p(95)": 95.32038129999988,
+            "avg": 47.45621810873386,
+            "min": 5.800166
+        },
+        "http_req_blocked": {
+            "avg": 0.031023262681958628,
+            "min": 0.00027,
+            "med": 0.000628,
+            "max": 26.279679,
+            "p(90)": 0.0014257000000000002,
+            "p(95)": 0.0015753499999999995
+        },
+        "data_sent": {
+            "count": 263313,
+            "rate": 1447.639983128798
+        }
+    },
+    "setup_data": {
+        "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwczovL3Byb3B1ZXN0YXMtYXBpLmxvY2FsIiwidXBuIjoiam9obkB1Y2UuZWR1LmVjIiwiZ3JvdXBzIjpbIlVTVUFSSU8iXSwiaWF0IjoxNzkyODI5MjI3LCJleHAiOjE3OTI4MzI4MjcsImp0aSI6ImIwOGI0ZGEyLTgxNmMtNGNkMS1hYWI1LTZmY2E5ZjljZTE3ZCJ9.kS-7amA2REEK40BoCTjjriEt4ByrfbCHkhzU3TjoDJxYUQmmmMfFAGqcE3sVfaIWmxnMLD5hj_L1nN0jrSMATMt1TYzvhtVzKD6amtxta5B48TSl7Ert7frNydCBsW5cop4oRCcysdqY1q3pctKpFO5gN9Ipgbpm0euEy37gcqj9-63Tw7YU6AbVxxB-b3UAuW3M3Y5jSkrHKNxJ82P-OyjeYvTTPJP_2MMCCIun4FV6PxYtcfWkXdy4Il2ssHY04lV2Guzzc17FL286wn6PPjxlMSL6sKzmffRWKtfA_SUBsHWz7FHZs5O-DJ-bOt2Ei4PxVmGaj80Fsm1zCdOEGQ"
+    },
+    "root_group": {
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+                "status esperado": {
+                    "name": "status esperado",
+                    "path": "::status esperado",
+                    "id": "55ecf1181ed7abcfe1940bc12b453999",
+                    "passes": 4533,
+                    "fails": 0
+                }
+            },
+        "name": "",
+        "path": ""
+    }
+}
