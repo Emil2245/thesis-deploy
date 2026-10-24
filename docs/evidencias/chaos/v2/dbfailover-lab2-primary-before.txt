@@ -1,0 +1,2 @@
+NAME              READY   STATUS    RESTARTS      AGE    IP           NODE        NOMINATED NODE   READINESS GATES
+propuestas-db-2   1/1     Running   1 (60m ago)   116m   10.42.1.46   k3s-lab-2   <none>           <none>

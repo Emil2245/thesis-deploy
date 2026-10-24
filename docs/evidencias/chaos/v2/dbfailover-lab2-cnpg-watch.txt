@@ -1,0 +1,24 @@
+2026-10-24T08:22:40Z propuestas-db   121m   2     2     Cluster in healthy state   propuestas-db-2
+2026-10-24T08:23:46Z propuestas-db   122m   2     2     Cluster in healthy state   propuestas-db-2
+2026-10-24T08:23:48Z propuestas-db   122m   2     2     Cluster in healthy state   propuestas-db-2
+2026-10-24T08:24:12Z propuestas-db   122m   2     1     Cluster in healthy state   propuestas-db-2
+2026-10-24T08:24:14Z propuestas-db   122m   2     1     Failing over               propuestas-db-2
+2026-10-24T08:24:14Z propuestas-db   122m   2     1     Failing over               propuestas-db-2
+2026-10-24T08:24:14Z propuestas-db   122m   2     1     Failing over               propuestas-db-2
+2026-10-24T08:24:14Z propuestas-db   122m   2     1     Failing over               propuestas-db-2
+2026-10-24T08:24:14Z propuestas-db   122m   2     1     Failing over               propuestas-db-2
+2026-10-24T08:24:31Z propuestas-db   123m   2     1     Failing over               propuestas-db-2
+2026-10-24T08:24:31Z propuestas-db   123m   2     1     Failing over               propuestas-db-1
+2026-10-24T08:24:32Z propuestas-db   123m   2     1     Failing over               propuestas-db-1
+2026-10-24T08:24:35Z propuestas-db   123m   2     1     Failing over               propuestas-db-1
+2026-10-24T08:28:41Z propuestas-db   127m   2     1     Failing over               propuestas-db-1
+2026-10-24T08:28:45Z propuestas-db   127m   2     1     Failing over               propuestas-db-1
+2026-10-24T08:28:45Z propuestas-db   127m   2     1     Failing over               propuestas-db-1
+2026-10-24T08:28:45Z propuestas-db   127m   2     1     Waiting for the instances to become active   propuestas-db-1
+2026-10-24T08:28:45Z propuestas-db   127m   2     1     Waiting for the instances to become active   propuestas-db-1
+2026-10-24T08:28:45Z propuestas-db   127m   2     1     Waiting for the instances to become active   propuestas-db-1
+2026-10-24T08:28:46Z propuestas-db   127m   2     1     Waiting for the instances to become active   propuestas-db-1
+2026-10-24T08:28:47Z propuestas-db   127m   2     1     Waiting for the instances to become active   propuestas-db-1
+2026-10-24T08:28:54Z propuestas-db   127m   2     1     Waiting for the instances to become active   propuestas-db-1
+2026-10-24T08:28:56Z propuestas-db   127m   2     2     Waiting for the instances to become active   propuestas-db-1
+2026-10-24T08:28:56Z propuestas-db   127m   2     2     Cluster in healthy state                     propuestas-db-1

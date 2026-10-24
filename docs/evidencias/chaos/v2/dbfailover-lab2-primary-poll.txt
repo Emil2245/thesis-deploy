@@ -1,0 +1,119 @@
+2026-10-24T08:22:39Z propuestas-db-2 Cluster in healthy state
+2026-10-24T08:22:44Z propuestas-db-2 Cluster in healthy state
+2026-10-24T08:22:49Z propuestas-db-2 Cluster in healthy state
+2026-10-24T08:22:54Z propuestas-db-2 Cluster in healthy state
+2026-10-24T08:23:00Z propuestas-db-2 Cluster in healthy state
+2026-10-24T08:23:05Z propuestas-db-2 Cluster in healthy state
+2026-10-24T08:23:10Z propuestas-db-2 Cluster in healthy state
+2026-10-24T08:23:15Z propuestas-db-2 Cluster in healthy state
+2026-10-24T08:23:20Z propuestas-db-2 Cluster in healthy state
+2026-10-24T08:23:25Z propuestas-db-2 Cluster in healthy state
+2026-10-24T08:23:30Z propuestas-db-2 Cluster in healthy state
+2026-10-24T08:23:35Z propuestas-db-2 Cluster in healthy state
+2026-10-24T08:23:40Z propuestas-db-2 Cluster in healthy state
+2026-10-24T08:23:45Z propuestas-db-2 Cluster in healthy state
+2026-10-24T08:23:51Z propuestas-db-2 Cluster in healthy state
+2026-10-24T08:23:56Z propuestas-db-2 Cluster in healthy state
+2026-10-24T08:24:01Z propuestas-db-2 Cluster in healthy state
+2026-10-24T08:24:06Z propuestas-db-2 Cluster in healthy state
+2026-10-24T08:24:11Z propuestas-db-2 Cluster in healthy state
+2026-10-24T08:24:16Z propuestas-db-2 Failing over
+2026-10-24T08:24:21Z propuestas-db-2 Failing over
+2026-10-24T08:24:26Z propuestas-db-2 Failing over
+2026-10-24T08:24:32Z propuestas-db-1 Failing over
+2026-10-24T08:24:37Z propuestas-db-1 Failing over
+2026-10-24T08:24:42Z propuestas-db-1 Failing over
+2026-10-24T08:24:47Z propuestas-db-1 Failing over
+2026-10-24T08:24:52Z propuestas-db-1 Failing over
+2026-10-24T08:24:57Z propuestas-db-1 Failing over
+2026-10-24T08:25:02Z propuestas-db-1 Failing over
+2026-10-24T08:25:08Z propuestas-db-1 Failing over
+2026-10-24T08:25:13Z propuestas-db-1 Failing over
+2026-10-24T08:25:18Z propuestas-db-1 Failing over
+2026-10-24T08:25:23Z propuestas-db-1 Failing over
+2026-10-24T08:25:28Z propuestas-db-1 Failing over
+2026-10-24T08:25:33Z propuestas-db-1 Failing over
+2026-10-24T08:25:38Z propuestas-db-1 Failing over
+2026-10-24T08:25:43Z propuestas-db-1 Failing over
+2026-10-24T08:25:48Z propuestas-db-1 Failing over
+2026-10-24T08:25:53Z propuestas-db-1 Failing over
+2026-10-24T08:25:58Z propuestas-db-1 Failing over
+2026-10-24T08:26:03Z propuestas-db-1 Failing over
+2026-10-24T08:26:08Z propuestas-db-1 Failing over
+2026-10-24T08:26:14Z propuestas-db-1 Failing over
+2026-10-24T08:26:19Z propuestas-db-1 Failing over
+2026-10-24T08:26:24Z propuestas-db-1 Failing over
+2026-10-24T08:26:29Z propuestas-db-1 Failing over
+2026-10-24T08:26:34Z propuestas-db-1 Failing over
+2026-10-24T08:26:39Z propuestas-db-1 Failing over
+2026-10-24T08:26:44Z propuestas-db-1 Failing over
+2026-10-24T08:26:49Z propuestas-db-1 Failing over
+2026-10-24T08:26:54Z propuestas-db-1 Failing over
+2026-10-24T08:26:59Z propuestas-db-1 Failing over
+2026-10-24T08:27:04Z propuestas-db-1 Failing over
+2026-10-24T08:27:10Z propuestas-db-1 Failing over
+2026-10-24T08:27:15Z propuestas-db-1 Failing over
+2026-10-24T08:27:20Z propuestas-db-1 Failing over
+2026-10-24T08:27:25Z propuestas-db-1 Failing over
+2026-10-24T08:27:30Z propuestas-db-1 Failing over
+2026-10-24T08:27:35Z propuestas-db-1 Failing over
+2026-10-24T08:27:40Z propuestas-db-1 Failing over
+2026-10-24T08:27:45Z propuestas-db-1 Failing over
+2026-10-24T08:27:50Z propuestas-db-1 Failing over
+2026-10-24T08:27:55Z propuestas-db-1 Failing over
+2026-10-24T08:28:01Z propuestas-db-1 Failing over
+2026-10-24T08:28:06Z propuestas-db-1 Failing over
+2026-10-24T08:28:11Z propuestas-db-1 Failing over
+2026-10-24T08:28:16Z propuestas-db-1 Failing over
+2026-10-24T08:28:21Z propuestas-db-1 Failing over
+2026-10-24T08:28:26Z propuestas-db-1 Failing over
+2026-10-24T08:28:31Z propuestas-db-1 Failing over
+2026-10-24T08:28:36Z propuestas-db-1 Failing over
+2026-10-24T08:28:41Z propuestas-db-1 Failing over
+2026-10-24T08:28:46Z propuestas-db-1 Waiting for the instances to become active
+2026-10-24T08:28:52Z propuestas-db-1 Waiting for the instances to become active
+2026-10-24T08:28:57Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:29:02Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:29:07Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:29:12Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:29:17Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:29:22Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:29:27Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:29:32Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:29:37Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:29:42Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:29:47Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:29:52Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:29:58Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:30:03Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:30:08Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:30:13Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:30:18Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:30:23Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:30:28Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:30:33Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:30:38Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:30:43Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:30:48Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:30:53Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:30:58Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:31:03Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:31:09Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:31:14Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:31:19Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:31:24Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:31:29Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:31:34Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:31:39Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:31:44Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:31:49Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:31:54Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:31:59Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:32:04Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:32:10Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:32:15Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:32:20Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:32:25Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:32:30Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:32:35Z propuestas-db-1 Cluster in healthy state
+2026-10-24T08:32:40Z propuestas-db-1 Cluster in healthy state

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Paso 2: rolling update bajo carga constante (10 VUs, 3 min); restart a los 30 s.
-set -u; cd "$(dirname "$0")/../.."; out=docs/evidencias/rolling; mkdir -p $out
+set -u; cd "$(dirname "$0")/../.."; out=${OUT:-docs/evidencias/rolling}; mkdir -p $out
 VUS=10 DURATION=3m k6 run --summary-export $out/k6-summary.json tests/load/constant.js > $out/k6-output.txt 2>&1 &
 k=$!
 sleep 30

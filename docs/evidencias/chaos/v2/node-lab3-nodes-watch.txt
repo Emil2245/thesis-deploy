@@ -1,0 +1,12 @@
+2026-10-24T08:14:22Z k3s-lab-1   Ready   control-plane   131m   v1.37.1+k3s1
+2026-10-24T08:14:22Z k3s-lab-2   Ready   <none>          119m   v1.37.1+k3s1
+2026-10-24T08:14:22Z k3s-lab-3   Ready   <none>          117m   v1.37.1+k3s1
+2026-10-24T08:15:40Z k3s-lab-1   Ready   control-plane   132m   v1.37.1+k3s1
+2026-10-24T08:15:55Z k3s-lab-3   NotReady   <none>          119m   v1.37.1+k3s1
+2026-10-24T08:15:55Z k3s-lab-3   NotReady   <none>          119m   v1.37.1+k3s1
+2026-10-24T08:15:56Z k3s-lab-3   NotReady   <none>          119m   v1.37.1+k3s1
+2026-10-24T08:17:23Z k3s-lab-3   Ready      <none>          120m   v1.37.1+k3s1
+2026-10-24T08:17:23Z k3s-lab-3   Ready      <none>          120m   v1.37.1+k3s1
+2026-10-24T08:17:26Z k3s-lab-3   Ready      <none>          121m   v1.37.1+k3s1
+2026-10-24T08:18:29Z k3s-lab-2   Ready      <none>          123m   v1.37.1+k3s1
+2026-10-24T08:20:47Z k3s-lab-1   Ready      control-plane   137m   v1.37.1+k3s1

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Paso 3b: apaga una VM del lab (Hyper-V) bajo carga, observa reprogramacion y la vuelve a encender.
 # Uso: node-failure.sh <vm> <tag>   (p. ej. k3s-lab-2 node)
-set -u; cd "$(dirname "$0")/../.."; vm=$1; tag=$2; out=docs/evidencias/chaos; mkdir -p $out
+set -u; cd "$(dirname "$0")/../.."; vm=$1; tag=$2; out=${OUT:-docs/evidencias/chaos}; mkdir -p $out
 psf=$(mktemp --suffix=.ps1); trap 'rm -f $psf' EXIT
 VUS=10 DURATION=${DURATION:-6m} k6 run --summary-export $out/$tag-k6-summary.json tests/load/constant.js > $out/$tag-k6-output.txt 2>&1 &
 k=$!

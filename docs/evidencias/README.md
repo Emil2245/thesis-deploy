@@ -26,6 +26,26 @@ resultados son de un laboratorio con 3 VMs en un solo equipo fisico: amenaza a l
 | kubeconform | 0 invalidos |
 | Pod Security `restricted` (dry-run server) | sin advertencias |
 
+## v2 (tras endurecimiento, plan 020) — 2026-10-24
+
+Cambios: `preStop: sleep 10` + `terminationGracePeriodSeconds` 40 (api) / 30 (web); tolerations
+`not-ready`/`unreachable` de 30 s en api y web; operador CNPG con 2 replicas y anti-affinity por nodo
+(quedaron en k3s-lab-2 y k3s-lab-3); `JWT_ISSUER=https://propuestas-api.local` unificado (base/local/lab).
+Las evidencias v1 se conservan arriba como el "antes".
+
+| Prueba | Resultado v2 |
+|---|---|
+| Rolling update (10 VUs, 3 min), 2 corridas | **0 fallos en ambas**: run1 0/4534 (p95 97 ms), run2 0/4840 (p95 37 ms). v1: 0.92 % 502. `rolling/v2/run{1,2}/`, `rolling/v2/timeline-plot.png`, `rolling/v2/grafana-rolling-v2.png` |
+| Fallo de nodo lab-3 (no primario; api x2 + web + replica DB), VM apagada 2 min | **0.19 % fallos (16/8277)**, todos 504/timeout entre 08:15:39Z y 08:16:11Z (32 s a 64 s tras apagar). NotReady a 48 s; eviction a +30 s (08:16:26Z); pods de reemplazo Ready 08:16:41Z (api) y 08:16:27Z (web): **46 s tras NotReady, ~94 s tras apagar**. v1: pods no se reprogramaban. `chaos/v2/node-lab3-*` |
+| Failover de BD: lab-2 (primario CNPG `propuestas-db-2` + operador + api/web) apagado 5 min | NotReady 08:24:11Z (47 s tras apagar 08:23:24Z); `Failing over` 08:24:14Z; nuevo primario `propuestas-db-1` 08:24:31Z (**20 s tras NotReady**; operador sobrevivio en lab-3); errores 503 de 08:23:36Z a 08:24:37Z (**~61 s**). **2.62 % fallos (351/13357)** -> supera el umbral k6 de 1 %; v1: 64.3 % y 5 min 36 s. Pods api/web reprogramados Ready 08:24:43-08:24:52Z. Cluster `Failing over` hasta que la VM volvio (08:28:45Z) y sano 08:28:56Z. `chaos/v2/dbfailover-lab2-*` |
+| Trivy api (`b025a77`) | 2 CRITICAL (`java-25-openjdk-*`, CVE-2026-91403, estado `under_investigation`, sin parche); con `--ignore-unfixed`: 0 CRITICAL. `seguridad/v2/` |
+
+Notas honestas: el 2.62 % de fallos del failover de BD y el 0.19 % del fallo de nodo vienen de la ventana
+de deteccion (kubelet marca NotReady a ~48 s; hasta entonces Traefik/endpoints siguen apuntando a pods
+inalcanzables); no se ajustaron HPA ni umbrales. Los reintentos/readiness no se tocaron.
+
+Spans JDBC / panel p95 (plan 020 Paso 5): **omitido**, la imagen del plan 019 aun no se habia publicado (el overlay prod sigue en api `b025a77`). Los hallazgos 3 y 4 siguen abiertos.
+
 ## Hallazgos que deben constar en la tesis (fallos honestos)
 
 1. **Rolling update no es "zero downtime"**: 0.64-0.92 % de peticiones 502 (sin `preStop`/sleep ni
@@ -52,10 +72,10 @@ resultados son de un laboratorio con 3 VMs en un solo equipo fisico: amenaza a l
 | Orquestacion | Despliegue declarativo en k3s multi-nodo, pods repartidos | PASS | `chaos/pods-estado-final.txt`, `gitops/capturas/argocd-propuestas-tree.png` |
 | Escalamiento horizontal | HPA 2->N bajo carga | PASS (2->6) | `hpa/timeline.csv`, `hpa/k6-summary.json`, `hpa/hpa-timeline.png`, `hpa/capturas/grafana-2-pico.png` |
 | Elasticidad (scale-in) | Vuelve a 2 al cesar la carga | PASS (90 s) | `hpa/timeline.csv`, `hpa/capturas/grafana-3-despues-scale-in.png` |
-| Resiliencia: rolling update | 0 peticiones fallidas | **FAIL** (0.92 % 502) | `rolling/k6-output.txt`, `rolling/run1-sin-diagnostico/`, `rolling/capturas/` |
+| Resiliencia: rolling update | 0 peticiones fallidas | v1 **FAIL** (0.92 % 502); **v2 PASS** (0 fallos en 2 corridas, `rolling/v2/`) | `rolling/k6-output.txt`, `rolling/run1-sin-diagnostico/`, `rolling/capturas/` |
 | Resiliencia: fallo de pods | disponibilidad >99 % | PASS (99.92 %) | `chaos/pod-kill-*`, `chaos/capturas/pod-kill-plot.png`, `chaos/capturas/grafana-pod-kill.png` |
-| Resiliencia: fallo de nodo | disponibilidad >99 % | PARTIAL (lab-2: 99.8 %; lab-3 con primario+operador: 40 %) | `chaos/node-lab2-*`, `chaos/dbfailover-lab3-*`, `chaos/capturas/node-lab2-plot.png`, `chaos/capturas/grafana-node-lab2.png` |
-| Alta disponibilidad de BD | failover automatico del primario | PARTIAL (failover OK en 18 s tras reprogramar operador; indisponibilidad 5.6 min) | `chaos/dbfailover-lab3-long-*`, `chaos/capturas/dbfailover-lab3-long-plot.png`, `chaos/capturas/grafana-dbfailover-lab3-long.png` |
+| Resiliencia: fallo de nodo | disponibilidad >99 % | v1 PARTIAL (lab-2: 99.8 %; lab-3 con primario+operador: 40 %); **v2 PASS** (lab-3 no primario: 99.81 %, pods reprogramados en 46 s tras NotReady; con primario+operador: ver BD) | `chaos/node-lab2-*`, `chaos/dbfailover-lab3-*`, `chaos/capturas/node-lab2-plot.png`, `chaos/capturas/grafana-node-lab2.png` |
+| Alta disponibilidad de BD | failover automatico del primario | v1 PARTIAL (failover OK en 18 s tras reprogramar operador; indisponibilidad 5.6 min); **v2 PARTIAL-PASS**: failover 20 s tras NotReady con operador HA, indisponibilidad ~61 s, 97.4 % disponibilidad (`chaos/v2/`); no alcanza >99 % por la ventana de deteccion de 48 s | `chaos/dbfailover-lab3-long-*`, `chaos/capturas/dbfailover-lab3-long-plot.png`, `chaos/capturas/grafana-dbfailover-lab3-long.png` |
 | Observabilidad: metricas | Prometheus recoge api y db | PASS | `observabilidad/prometheus-metric.json`, `hpa/capturas/*.png` (p95 sin datos, ver hallazgo 4) |
 | Observabilidad: logs | Loki con traceId | PASS | `observabilidad/loki-logs.json`, `observabilidad/capturas/grafana-loki-logs.png` |
 | Observabilidad: trazas | Tempo recibe traza con traceId inyectado | PARTIAL (solo span HTTP; sin JDBC) | `observabilidad/tempo-trace-login.json`, `observabilidad/capturas/grafana-tempo-trace.png` |
@@ -65,7 +85,7 @@ resultados son de un laboratorio con 3 VMs en un solo equipo fisico: amenaza a l
 | GitOps | Argo CD sincroniza desde git; historial | PASS | `gitops/argocd-history.json`, `gitops/argocd-applications.txt`, `gitops/capturas/argocd-applications.png` |
 | IaC | Manifiestos validos | PASS | `seguridad/kubeconform.txt` |
 | CI | Imagenes construidas por CI y tag bump automatico | PARTIAL (commits `chore(release)` de github-actions visibles en Argo; no se enlazaron ejecuciones) | `gitops/capturas/argocd-propuestas-tree.png` |
-| Seguridad: imagenes | 0 CRITICAL | **FAIL** (api 2 CRITICAL/29 HIGH; web 45 HIGH) | `seguridad/trivy-image-api.txt`, `seguridad/trivy-image-web.txt` |
+| Seguridad: imagenes | 0 CRITICAL | **FAIL** v1 (api 2 CRITICAL/29 HIGH; web 45 HIGH); v2 **PARTIAL** — sin parche disponible (CVE-2026-91403 `under_investigation`, `java-25-openjdk-*`); la puerta de release (ignore-unfixed) lo acepta; se revisara al publicarse el parche (`seguridad/v2/`) | `seguridad/trivy-image-api.txt`, `seguridad/trivy-image-web.txt` |
 | Seguridad: config | 0 HIGH/CRITICAL | PASS | `seguridad/trivy-config.txt` |
 | Seguridad: PSS restricted | sin advertencias | PASS | `seguridad/pss.txt` |
 | Aplicacion accesible | Login y listado funcionan en el lab | PASS (tras corregir JWT_ISSUER) | `app/capturas/app-login.png`, `app/capturas/app-proyectos.png`, `app/capturas/app-trycloudflare.png` |
@@ -82,7 +102,7 @@ resultados son de un laboratorio con 3 VMs en un solo equipo fisico: amenaza a l
 | VI Procesos | PASS | API sin estado (JWT), escalable por HPA (2->6 demostrado) |
 | VII Port binding | PASS | Quarkus en 8080 (+ gestion 9000) |
 | VIII Concurrencia | PASS | Escalado horizontal por procesos/pods |
-| IX Desechabilidad | PARTIAL | Arranque ~8 s, pods reemplazados en 10 s, pero 502 al terminar pods (sin apagado ordenado coordinado con el ingress) |
-| X Paridad dev/prod | PARTIAL | Mismos manifiestos con overlays, pero overlay local con issuer inconsistente |
+| IX Desechabilidad | v1 PARTIAL; v2 PASS | Arranque ~8 s; con `preStop` de 10 s el rolling update tiene 0 fallos (plan 020) |
+| X Paridad dev/prod | v1 PARTIAL; v2 PASS | `JWT_ISSUER` unificado en base/local/lab (plan 020) |
 | XI Logs | PASS | Logs JSON a stdout recogidos por Alloy a Loki con traceId |
 | XII Procesos de administracion | PARTIAL | Migraciones Flyway al arrancar; ingesta del dataset no verificada como Job puntual |
