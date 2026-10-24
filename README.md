@@ -8,7 +8,7 @@ describe el despliegue con **Kustomize**; **Argo CD** sincroniza el clúster des
 apps/backend, apps/frontend   submódulos (thesis-back-quarkus, thesis-front-react)
 clusters/local/               configuración k3d
 k8s/argocd/                   values de Argo CD y app-of-apps (root-local/prod)
-k8s/platform/                 add-ons (CloudNativePG; plan 009 agrega más)
+k8s/platform/                 add-ons por directorio: CloudNativePG, cert-manager+issuers, kube-prometheus-stack, loki, tempo, alloy, dashboards, sealed-secrets
 k8s/apps/                     Applications de la app por entorno
 k8s/propuestas/{base,overlays/{local,prod}}   manifiestos Kustomize
 scripts/                      install-tools, cluster-local-up/down, build-local-images, bootstrap, validate
