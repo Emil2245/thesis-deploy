@@ -110,3 +110,5 @@ Hallazgos de la corrida v1 (plan 012); se conservan como el "antes" y se anota s
 | X Paridad dev/prod | v1 PARTIAL; v2 PASS | `JWT_ISSUER` unificado en base/local/lab (plan 020) |
 | XI Logs | PASS | Logs JSON a stdout recogidos por Alloy a Loki con traceId |
 | XII Procesos de administracion | PARTIAL | Migraciones Flyway al arrancar; ingesta del dataset no verificada como Job puntual |
+
+Smoke del release en el laboratorio (api 738cb0d, web 7fdbaf0, Flyway V022): [smoke-2026-10-release.md](smoke-2026-10-release.md).
