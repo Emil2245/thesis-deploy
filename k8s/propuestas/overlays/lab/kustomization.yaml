@@ -9,7 +9,7 @@ configMapGenerator:
   - name: propuestas-api-config
     behavior: merge
     literals:
-      - CORS_ORIGINS=https://propuestas.192.168.1.9.sslip.io
+      - CORS_ORIGINS=https://propuestas.192.168.1.9.sslip.io,/https://[a-z0-9-]+\.trycloudflare\.com/
       - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=lab
 patches:
   - target: {kind: Cluster, name: propuestas-db}
