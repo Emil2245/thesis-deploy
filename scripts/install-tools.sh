@@ -7,7 +7,7 @@ K3D_VERSION=v5.9.0
 KUBECONFORM_VERSION=v0.8.0
 TOFU_VERSION=1.13.2
 TFLINT_VERSION=v0.65.0
-KUBESEAL_VERSION=0.40.0
+KUBESEAL_VERSION=0.41.1
 BIN="${HOME}/.local/bin"; mkdir -p "$BIN"
 T="$(mktemp -d)"; trap 'rm -rf "$T"' EXIT
 cd "$T"

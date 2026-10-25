@@ -33,7 +33,7 @@
   | `tempo` (single binary; **chart marcado deprecated** upstream, se mantiene por el plan; migrar a `tempo-distributed`/Alloy en el futuro) | https://grafana.github.io/helm-charts | `1.24.4` | monitoring | -4 |
   | `alloy` (DaemonSet, Service `alloy` :4317/:4318) | https://grafana.github.io/helm-charts | `1.14.3` | monitoring | -3 |
 
-  Issuers (`k8s/platform/issuers/manifests`, wave -5) y dashboard (`k8s/platform/dashboards/manifests`, wave -4) son Applications de ruta git. En prod, `kube-prometheus-stack` suma `values-prod.yaml` mediante un parche en `k8s/platform/prod/kustomization.yaml`. `kubeseal` v0.40.0 se instala con `scripts/install-tools.sh`.
+  Issuers (`k8s/platform/issuers/manifests`, wave -5) y dashboard (`k8s/platform/dashboards/manifests`, wave -4) son Applications de ruta git. En prod, `kube-prometheus-stack` suma `values-prod.yaml` mediante un parche en `k8s/platform/prod/kustomization.yaml`. `kubeseal` v0.41.1 se instala con `scripts/install-tools.sh`.
 
   | Pilar | Evidencia (cluster vivo) |
   |---|---|
