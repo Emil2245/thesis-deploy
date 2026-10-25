@@ -28,7 +28,7 @@
   |---|---|---|---|---|
   | `cert-manager` | https://charts.jetstack.io | `v1.21.3` | cert-manager | -10 |
   | `sealed-secrets` | https://bitnami.github.io/sealed-secrets (el antiguo `bitnami-labs.github.io` da 404) | `2.20.0` (controller 0.40.0) | kube-system | -10 |
-  | `kube-prometheus-stack` | https://prometheus-community.github.io/helm-charts | `92.11.0` | monitoring | -5 |
+  | `kube-prometheus-stack` | https://prometheus-community.github.io/helm-charts | `92.13.1` | monitoring | -5 |
   | `loki` (SingleBinary, filesystem, sin gateway: `svc/loki:3100`) | https://grafana.github.io/helm-charts | `7.5.0` | monitoring | -4 |
   | `tempo` (single binary; **chart marcado deprecated** upstream, se mantiene por el plan; migrar a `tempo-distributed`/Alloy en el futuro) | https://grafana.github.io/helm-charts | `1.24.4` | monitoring | -4 |
   | `alloy` (DaemonSet, Service `alloy` :4317/:4318) | https://grafana.github.io/helm-charts | `1.14.3` | monitoring | -3 |
