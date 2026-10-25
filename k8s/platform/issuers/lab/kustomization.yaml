@@ -1,0 +1,20 @@
+# Lab: sin dominio publico no hay ACME; solo selfsigned + local-ca (prod conserva letsencrypt).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../manifests
+patches:
+  - target: {kind: ClusterIssuer, name: letsencrypt-staging}
+    patch: |-
+      $patch: delete
+      apiVersion: cert-manager.io/v1
+      kind: ClusterIssuer
+      metadata:
+        name: letsencrypt-staging
+  - target: {kind: ClusterIssuer, name: letsencrypt-prod}
+    patch: |-
+      $patch: delete
+      apiVersion: cert-manager.io/v1
+      kind: ClusterIssuer
+      metadata:
+        name: letsencrypt-prod

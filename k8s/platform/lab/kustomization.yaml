@@ -19,3 +19,9 @@ patches:
       - op: add
         path: /spec/sources/0/helm/valueFiles/-
         value: $values/k8s/platform/kube-prometheus-stack/values-lab.yaml
+  # lab: el Application issuers apunta a la variante sin letsencrypt (ClusterIssuers ACME quedan NotReady sin dominio publico)
+  - target: {kind: Application, name: issuers}
+    patch: |-
+      - op: replace
+        path: /spec/source/path
+        value: k8s/platform/issuers/lab

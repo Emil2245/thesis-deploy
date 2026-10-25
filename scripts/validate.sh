@@ -21,6 +21,10 @@ for d in issuers dashboards tunnel; do
     -schema-location default \
     -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
 done
+echo "== platform/issuers/lab"
+kubectl kustomize k8s/platform/issuers/lab | kubeconform -strict -summary -ignore-missing-schemas \
+  -schema-location default \
+  -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
 echo "== dashboard JSON"
 kubectl kustomize k8s/platform/dashboards/manifests \
   | python3 -c 'import sys,json,re
