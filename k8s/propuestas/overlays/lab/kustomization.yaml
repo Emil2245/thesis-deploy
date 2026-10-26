@@ -3,7 +3,7 @@ kind: Kustomization
 resources:
   - ../../base
 images:
-  - {name: ghcr.io/emil2245/propuestas-api, newTag: 02f8774}
+  - {name: ghcr.io/emil2245/propuestas-api, newTag: 1a1ae4c}
   - {name: ghcr.io/emil2245/propuestas-web, newTag: 7fdbaf0}
 configMapGenerator:
   - name: propuestas-api-config
