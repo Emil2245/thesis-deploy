@@ -31,7 +31,8 @@ data:
         log_group_name    /propuestas/api
         log_stream_prefix pod-
         auto_create_group Off
-        endpoint          http://172.18.0.2:4566
+        endpoint          172.18.0.2
+        port              4566
   parsers.conf: |
     [PARSER]
         Name   noop
