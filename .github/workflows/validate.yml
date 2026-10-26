@@ -42,5 +42,9 @@ jobs:
       - run: tofu -chdir=infra/hetzner init -backend=false
       - run: tofu -chdir=infra/hetzner validate
       - run: tofu -chdir=infra/hetzner fmt -check
+      - run: tofu -chdir=infra/aws-floci init -backend=false
+      - run: tofu -chdir=infra/aws-floci validate
+      - run: tofu -chdir=infra/aws-floci fmt -check
       - uses: terraform-linters/setup-tflint@v6
       - run: tflint --chdir=infra/hetzner --init && tflint --chdir=infra/hetzner
+      - run: tflint --chdir=infra/aws-floci --init && tflint --chdir=infra/aws-floci

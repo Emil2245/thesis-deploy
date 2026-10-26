@@ -3,7 +3,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 export PATH="$HOME/.local/bin:$PATH"
-for o in local lab prod; do
+for o in local lab prod aws; do
   echo "== overlay $o"
   kubectl kustomize "k8s/propuestas/overlays/$o" | kubeconform -strict -summary -ignore-missing-schemas \
     -schema-location default \
@@ -21,6 +21,18 @@ for d in issuers dashboards tunnel; do
     -schema-location default \
     -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
 done
+echo "== aws-floci: fluent-bit y apps"
+for d in k8s/platform/aws-floci/fluent-bit k8s/apps/propuestas-aws; do
+  kubectl kustomize "$d" | kubeconform -strict -summary -ignore-missing-schemas \
+    -schema-location default \
+    -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
+done
+if command -v tofu >/dev/null; then
+  echo "== infra/aws-floci (tofu fmt + validate)"
+  tofu -chdir=infra/aws-floci fmt -check
+  tofu -chdir=infra/aws-floci init -backend=false -input=false >/dev/null
+  tofu -chdir=infra/aws-floci validate
+fi
 echo "== platform/issuers/lab"
 kubectl kustomize k8s/platform/issuers/lab | kubeconform -strict -summary -ignore-missing-schemas \
   -schema-location default \

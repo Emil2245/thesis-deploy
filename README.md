@@ -7,12 +7,14 @@ describe el despliegue con **Kustomize**; **Argo CD** sincroniza el clúster des
 ```
 apps/backend, apps/frontend   submódulos (thesis-back-quarkus, thesis-front-react)
 clusters/local/               configuración k3d
+clusters/aws-floci/           VM aws-lab-1 (Docker + Floci, AWS emulado) y su cloud-init (plan 035)
 k8s/argocd/                   values de Argo CD y app-of-apps (root-local/lab/prod)
 k8s/platform/                 add-ons por directorio: CloudNativePG, cert-manager+issuers, kube-prometheus-stack, loki, tempo, alloy, dashboards, sealed-secrets
 k8s/apps/                     Applications de la app por entorno
-k8s/propuestas/{base,overlays/{local,lab,prod}}   manifiestos Kustomize
+k8s/propuestas/{base,overlays/{local,lab,prod,aws}}   manifiestos Kustomize
 infra/hetzner/                OpenTofu: Hetzner + k3s (plan 010)
-scripts/                      install-tools, prod-up/down, cluster-local-up/down, build-local-images, bootstrap, validate, bump-submodules, seal-jwt, lab/ (tunnel-url)
+infra/aws-floci/              OpenTofu: EKS + RDS + ECR + S3 + Secrets Manager + ALB sobre AWS emulado (plan 035)
+scripts/                      install-tools, prod-up/down, cluster-local-up/down, build-local-images, bootstrap, validate, bump-submodules, seal-jwt, lab/ (tunnel-url), aws-floci/ (up, kubeconfig, copy-images, sync-secrets, hpa-test, restore-test, screenshots)
 .github/workflows/            validate.yml (PR/push), release.yml (build+push GHCR+bump GitOps)
 docs/                         decisiones.md, runbook.md
 ```
@@ -36,6 +38,12 @@ scripts/prod-up.sh      # crea red, firewall, 2 VMs, k3s y Argo CD
 scripts/prod-down.sh    # destruye todo
 ```
 Detalles, costos y state: [infra/hetzner/README.md](infra/hetzner/README.md).
+
+## Nube emulada (AWS con Floci, plan 035)
+Sustituto ejecutable de producción: OpenTofu crea EKS, RDS (PostgreSQL 18), ECR, S3, Secrets Manager, KMS, ALB, ACM y Route 53
+en un emulador AWS (Floci) que corre en la VM `aws-lab-1` del laboratorio. App en `http://<IP de aws-lab-1>:8080` (ALB emulado).
+`scripts/aws-floci/up.sh` · detalles: [clusters/aws-floci/README.md](clusters/aws-floci/README.md), runbook y
+[docs/evidencias/aws-floci-2026-10.md](docs/evidencias/aws-floci-2026-10.md).
 
 ## Releases
 Los submódulos fijan la versión de la app. **Cómo hacer un release:**
