@@ -59,3 +59,12 @@ Nota: un arranque en frío del PC bloquea VT-x; reiniciar en caliente desde macO
 URL actual: `scripts/lab/tunnel-url.sh`. Cambia al reiniciar: `kubectl -n tunnel rollout restart deploy/cloudflared`.
 Desactivar: quitar `../tunnel` de `k8s/platform/lab/kustomization.yaml`.
 Seguridad: la app es pública mientras el túnel corre; los usuarios demo del seed V004 tienen contraseñas conocidas, cambiarlas antes de compartir la URL.
+
+## Entorno `aws-floci` (AWS emulado, plan 035)
+VM `aws-lab-1` (4 vCPU / 12 GB, IP DHCP; reservarla en el router) con Docker + Floci 2.3.0 (`clusters/aws-floci/compose.yaml`); estado persistente en `/opt/floci/data`.
+- **Crear la VM:** `WORK=<dir> scripts/lab/render-seeds.sh floci aws-lab-1`, copiar el ISO a `C:\lab\seeds\seed-aws-lab-1.iso` (scp con la misma clave que `winps.sh`) y `scripts/lab/winps.sh` con `new-vm.ps1 -Name aws-lab-1 -Cpu 4 -MemGB 12`. IP: escaneo de la LAN (Hyper-V no la reporta). Salud: `curl http://<ip>:4566/_floci/health`.
+- **Up:** `FLOCI_IP=<ip> scripts/aws-floci/up.sh` (tofu apply, kubeconfig `~/.kube/propuestas-aws.yaml`, copia de imágenes a ECR, secretos, Argo CD + app-of-apps). Requiere `aws` CLI (v1 sirve), `tofu`, `kubectl`, `helm`, `jq`.
+- **Down:** `tofu -chdir=infra/aws-floci destroy` y, si se quiere borrar todo, parar la VM desde Hyper-V (solo `aws-lab-1`). **Reset:** `docker compose -f /opt/floci/compose.yaml down -v` y `rm -rf /opt/floci/data` en la VM, luego `up.sh`.
+- **Reiniciar Floci** (`docker compose up -d` tras cambiar el compose) recrea el contenedor k3s del EKS; el estado del clúster persiste, pero no hacerlo durante una prueba de carga. Con `FLOCI_HOSTNAME=floci` el endpoint de RDS pasa a `floci:7001` (dentro de pods se usa la IP del contenedor `172.18.0.2`).
+- **Operación:** respaldos `kubectl -n propuestas create job --from=cronjob/propuestas-backup <nombre>`; restauración de prueba `scripts/aws-floci/restore-test.sh`; HPA `DEMO_PASSWORD=... scripts/aws-floci/hpa-test.sh`; capturas `scripts/aws-floci/screenshots.mjs`. Consola web de Floci: `http://<ip>:4500`.
+
