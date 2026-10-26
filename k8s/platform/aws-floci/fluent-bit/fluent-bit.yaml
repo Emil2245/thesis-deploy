@@ -33,8 +33,8 @@ data:
         auto_create_group Off
         endpoint          172.18.0.2
         port              4566
-        # Floci sirve HTTPS en 4566 (FLOCI_TLS_ENABLED); su CA local no está en la imagen y el cert no cubre la IP
-        tls               On
+        # Floci sirve HTTPS en 4566 (FLOCI_TLS_ENABLED); el plugin usa TLS siempre ("tls" no es una propiedad válida aquí)
+        # y el cert de Floci no cubre la IP, de ahí tls.verify Off (solo en este entorno emulado)
         tls.verify        Off
   parsers.conf: |
     [PARSER]

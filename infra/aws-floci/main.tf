@@ -276,3 +276,10 @@ resource "aws_iam_user_policy_attachment" "workload" {
   user       = aws_iam_user.workload.name
   policy_arn = aws_iam_policy.workload.arn
 }
+
+# Sin este addon Floci no muta los pods (igual que EKS real: la asociación solo surte efecto con el agente instalado).
+resource "aws_eks_addon" "pod_identity_agent" {
+  cluster_name = aws_eks_cluster.main.name
+  addon_name   = "eks-pod-identity-agent"
+  tags         = local.tags
+}
