@@ -36,9 +36,11 @@ spec:
                   valueFrom: {secretKeyRef: {name: propuestas-db-app, key: password}}
               securityContext:
                 allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
                 capabilities: {drop: [ALL]}
               volumeMounts:
                 - {name: backup, mountPath: /backup}
+                - {name: tmp, mountPath: /tmp}
           containers:
             - name: s3-upload
               image: amazon/aws-cli:2.38.5
@@ -54,6 +56,7 @@ spec:
                 - {name: HOME, value: /tmp}
               securityContext:
                 allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
                 capabilities: {drop: [ALL]}
               volumeMounts:
                 - {name: backup, mountPath: /backup}

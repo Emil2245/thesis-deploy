@@ -11,6 +11,6 @@ tests/record-timeline.sh "$OUT/timeline.csv" "${TIMELINE_SECS:-780}" &
 rec=$!
 date -u +%FT%TZ > "$OUT/k6-start.txt"
 $RT run --rm --network host -e BASE_URL="http://$FLOCI_IP:8080" -e DEMO_PASSWORD="$DEMO_PASSWORD" \
-  -v "$PWD/tests/load:/load:ro,Z" "$K6_IMAGE" run --summary-export /dev/stdout /load/hpa-scaling.js > "$OUT/k6-output.txt" 2>&1
+  -v "$PWD/tests/load:/load:ro,Z" -v "$PWD/$OUT:/out:Z" "$K6_IMAGE" run --summary-export /out/k6-summary.json /load/hpa-scaling.js > "$OUT/k6-output.txt" 2>&1
 date -u +%FT%TZ > "$OUT/k6-end.txt"
 wait $rec

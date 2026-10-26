@@ -58,6 +58,8 @@ spec:
       labels:
         app.kubernetes.io/name: fluent-bit
     spec:
+      securityContext:
+        seccompProfile: {type: RuntimeDefault}
       containers:
         - name: fluent-bit
           image: fluent/fluent-bit:5.1.5
@@ -69,14 +71,22 @@ spec:
               valueFrom: {secretKeyRef: {name: aws-workload-credentials, key: AWS_ACCESS_KEY_ID}}
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom: {secretKeyRef: {name: aws-workload-credentials, key: AWS_SECRET_ACCESS_KEY}}
+          securityContext:
+            runAsUser: 0   # lee /var/log/pods del nodo (hostPath de solo lectura)
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
           resources:
             requests: {cpu: 50m, memory: 64Mi}
             limits: {memory: 200Mi}
           volumeMounts:
             - {name: config, mountPath: /fluent-bit/etc}
             - {name: varlog, mountPath: /var/log, readOnly: true}
+            - {name: tmp, mountPath: /tmp}
       volumes:
         - name: config
           configMap: {name: fluent-bit-config}
         - name: varlog
           hostPath: {path: /var/log}
+        - name: tmp
+          emptyDir: {}
