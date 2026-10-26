@@ -33,7 +33,9 @@ data:
         auto_create_group Off
         endpoint          172.18.0.2
         port              4566
-        tls               Off
+        # Floci sirve HTTPS en 4566 (FLOCI_TLS_ENABLED); su CA local no está en la imagen y el cert no cubre la IP
+        tls               On
+        tls.verify        Off
   parsers.conf: |
     [PARSER]
         Name   noop
