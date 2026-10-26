@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/emil2245/thesis-deploy
+    targetRevision: feat/035-aws-floci   # TEMPORAL: se cambia a main en el último commit del PR
+    path: k8s/apps/propuestas-aws
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}

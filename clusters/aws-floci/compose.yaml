@@ -1,0 +1,19 @@
+# Floci (emulador AWS) en la VM aws-lab-1. Se copia a /opt/floci/compose.yaml por cloud-init.
+name: floci
+services:
+  floci:
+    image: floci/floci:2.3.0
+    container_name: floci
+    restart: unless-stopped
+    ports:
+      - "4566:4566"            # APIs AWS + ECR (docker push/pull) + listeners ALB
+      - "7001-7099:7001-7099"  # proxy RDS (PostgreSQL)
+      - "8080-8089:8080-8089"  # listeners ALB (HTTP)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/floci/data:/app/data
+    environment:
+      FLOCI_STORAGE_MODE: persistent
+      FLOCI_STORAGE_PERSISTENT_PATH: /app/data
+      FLOCI_SERVICES_DOCKER_NETWORK: floci_default
+      FLOCI_SERVICES_RDS_DEFAULT_POSTGRES_IMAGE: postgres:18.6-alpine

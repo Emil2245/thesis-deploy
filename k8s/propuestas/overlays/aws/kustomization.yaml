@@ -1,0 +1,93 @@
+# Overlay "aws": EKS emulado por Floci (infra/aws-floci). Sin CNPG: la base de datos es RDS (PostgreSQL 18).
+# Sin Ingress/Traefik: el ALB reenvía a NodePorts del nodo (30080 web, 30081 api; ver infra/aws-floci/alb.tf).
+# Los Secrets (propuestas-db-app, propuestas-jwt, aws-workload-credentials) los crea
+# scripts/aws-floci/sync-secrets.sh desde Secrets Manager; nunca viven en git.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+  - serviceaccount.yaml
+  - backup-cronjob.yaml
+images:
+  - name: ghcr.io/emil2245/propuestas-api
+    newName: 000000000000.dkr.ecr.us-east-1.localhost:4566/propuestas-api
+    newTag: 02f8774
+  - name: ghcr.io/emil2245/propuestas-web
+    newName: 000000000000.dkr.ecr.us-east-1.localhost:4566/propuestas-web
+    newTag: 7fdbaf0
+configMapGenerator:
+  - name: propuestas-api-config
+    behavior: merge
+    literals:
+      # origen del ALB (IP de la VM aws-lab-1 + puerto del listener)
+      - CORS_ORIGINS=http://192.168.1.12:8080
+      # no hay Alloy/OTLP en este entorno
+      - OTEL_SDK_DISABLED=true
+      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=aws-floci
+patches:
+  # CRDs de CNPG y Prometheus Operator no existen en este clúster
+  - target: {kind: Cluster, name: propuestas-db}
+    patch: |-
+      $patch: delete
+      apiVersion: postgresql.cnpg.io/v1
+      kind: Cluster
+      metadata:
+        name: propuestas-db
+  - target: {kind: ServiceMonitor, name: propuestas-api}
+    patch: |-
+      $patch: delete
+      apiVersion: monitoring.coreos.com/v1
+      kind: ServiceMonitor
+      metadata:
+        name: propuestas-api
+  - target: {kind: Ingress, name: propuestas}
+    patch: |-
+      $patch: delete
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: propuestas
+  - target: {kind: NetworkPolicy, name: allow-db-access}
+    patch: |-
+      $patch: delete
+      apiVersion: networking.k8s.io/v1
+      kind: NetworkPolicy
+      metadata:
+        name: allow-db-access
+  # el tráfico del ALB llega por NodePort desde la red docker del emulador
+  - target: {kind: NetworkPolicy, name: allow-traefik-to-apps}
+    patch: |-
+      - op: replace
+        path: /spec/ingress/0/from
+        value:
+          - ipBlock: {cidr: 0.0.0.0/0}
+  - target: {kind: Service, name: propuestas-api}
+    patch: |-
+      - op: add
+        path: /spec/type
+        value: NodePort
+      - op: add
+        path: /spec/ports/0/nodePort
+        value: 30081
+  - target: {kind: Service, name: propuestas-web}
+    patch: |-
+      - op: add
+        path: /spec/type
+        value: NodePort
+      - op: add
+        path: /spec/ports/0/nodePort
+        value: 30080
+  # base de datos = RDS (proxy de Floci en la red docker floci_default)
+  - target: {kind: Deployment, name: propuestas-api}
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0/value
+        value: jdbc:postgresql://172.18.0.2:7001/propuestas
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+  - target: {kind: Deployment, name: propuestas-web}
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
