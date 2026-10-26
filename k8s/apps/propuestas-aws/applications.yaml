@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/emil2245/thesis-deploy
-    targetRevision: feat/035-aws-floci   # TEMPORAL: se cambia a main en el último commit del PR
+    targetRevision: main
     path: k8s/propuestas/overlays/aws
   destination:
     server: https://kubernetes.default.svc
@@ -29,7 +29,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/emil2245/thesis-deploy
-    targetRevision: feat/035-aws-floci   # TEMPORAL: se cambia a main en el último commit del PR
+    targetRevision: main
     path: k8s/platform/aws-floci/fluent-bit
   destination:
     server: https://kubernetes.default.svc
