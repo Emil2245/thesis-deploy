@@ -33,6 +33,7 @@ data:
         auto_create_group Off
         endpoint          172.18.0.2
         port              4566
+        tls               Off
   parsers.conf: |
     [PARSER]
         Name   noop
