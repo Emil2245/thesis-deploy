@@ -21,7 +21,7 @@
 
 ## Notas de implementación
 
-- Versiones fijadas: k3s `v1.37.1-k3s1`, Argo CD chart `10.11.1`, chart `cloudnative-pg` `0.29.1`, PostgreSQL `ghcr.io/cloudnative-pg/postgresql:18.6`.
+- Versiones fijadas: k3s `v1.37.1-k3s1`, Argo CD chart `10.11.6`, chart `cloudnative-pg` `0.29.1`, PostgreSQL `ghcr.io/cloudnative-pg/postgresql:18.6`.
 - Plan 009, charts de plataforma (Application por directorio, `values.yaml` junto a cada una, multi-source `$values` de Argo CD):
 
   | Chart | Repo | Versión | Namespace | Wave |
@@ -87,3 +87,18 @@ Producción en Hetzner (`infra/hetzner/`) nunca se aplicó (sin token). Se despl
 ## Floci sin brechas (plan 040)
 Versiones consultadas el 2026-10-26/27: Floci 2.3.0 (última estable), OpenTofu 1.13.2, `hashicorp/aws` 6.70.0, AWS CLI 2.38.6, External Secrets chart 2.14.0, Traefik chart 42.1.3 (ingress-nginx está retirado), kube-prometheus-stack 92.14.0, Tempo 1.24.4, Fluent Bit 5.1.5, `alpine/socat` 1.8.1.3, k6 2.3.0, Argo CD chart 10.11.1.
 Decisiones: (G1) el `aws_eks_node_group` (desired 2) es metadato porque Floci materializa un solo contenedor k3s por clúster; los nodos reales adicionales son agentes k3s en la red docker de Floci (`add-workers.sh`). (G2) Pod Identity con relay propio (DaemonSet `socat` con TLS verificado) porque el relay de Floci no arranca (imagen k3s sin gestor de paquetes); sin claves estáticas ni usuario IAM de cargas. (G3) ESO con `ClusterSecretStore` sin `auth` (cadena por defecto = pod identity) y endpoint/CA por variables de entorno. (G4) TLS verificado hacia Floci por el nombre `floci` (SAN del certificado generado con `FLOCI_HOSTNAME`), resuelto por CoreDNS, CA en ConfigMap. (G5) Traefik NodePort 30080 (con `LoadBalancer` el servicelb de k3s captura :80 de cualquier destino y rompe el relay). (G6) Listener HTTPS + certificado ACM declarados; Floci 2.3.0 no termina TLS, por eso `alb_redirect_http=false`. (G7) `restore-drill.sh`. (G8) `up.sh`/`down.sh`/`smoke.sh`. (G9) Prometheus (kube-prometheus-stack ligero) en vez de métricas CloudWatch (coherente con los demás entornos y sin depender de `PutMetricData`) y trazas directas a Tempo.
+
+## Despliegue en un VPS genérico (plan 041)
+Entorno `vps`: una máquina Ubuntu 24.04 con IP pública y SSH, `scripts/vps/up.sh <ip> --domain <dominio> --issuer <emisor>` (k3s + Argo CD + GitOps). Manual verificado: `manual-despliegue-vps/` (repo de documentación). Evidencia: [docs/evidencias/vps-2026-10.md](evidencias/vps-2026-10.md).
+
+Versiones consultadas el 2026-10-27: k3s `v1.37.1+k3s1` (canal *latest*; el canal *stable* sigue en `v1.36.5+k3s1`; se mantiene la 1.37.1 por coherencia con laboratorio, local e `infra/hetzner`, ya fijada en los tres), Argo CD chart **`10.11.6`** (subida desde 10.11.1 en `scripts/bootstrap.sh` y `scripts/aws-floci/up.sh`, vale para todos los entornos), cert-manager `v1.21.3`, `cloudnative-pg` chart `0.29.1`, SeaweedFS `4.51`, AWS CLI `2.38.6`, `postgres:18.6-alpine` (última 18.x alpine), k6 `2.3.0`. Pendiente fuera de este plan: kube-prometheus-stack tiene `92.14.0` y el repositorio fija `92.13.1`.
+
+| Decisión | Elegido | Motivo |
+|---|---|---|
+| Repositorio genérico, dominio por parámetro | `up.sh` renderiza la Application `root` (plantilla `k8s/argocd/root-vps.yaml`) con **parches kustomize en línea** (`spec.source.kustomize.patches`) que Argo CD aplica a las Applications hijas: host/emisor/CORS del Ingress, `values` de Grafana, correo ACME, instancias de la base, y opcionalmente `--repo`/`--revision` | No hay que bifurcar ni editar archivos, nada se commitea, y `selfHeal` conserva los parches. Descartado: `sed` + commit (ensucia git, exige push) y editar un archivo del repo (rompe la idempotencia) |
+| Entorno sobre prod | `overlays/vps` = `../prod` + respaldos; `platform/vps` = plataformas de prod + `backup-store` | Hereda las etiquetas de imagen que CI actualiza en `overlays/prod`; no se toca el comportamiento de la ruta Hetzner |
+| TLS | `letsencrypt-prod/staging` (HTTP-01 por Traefik) o `selfsigned-ca` (nuevo ClusterIssuer con CA propia, en `issuers/manifests`) | Detrás de NAT (laboratorio) Let's Encrypt no puede validar: allí se verifica con `selfsigned-ca`; la emisión real de Let's Encrypt no se ejercitó |
+| Secretos | Secrets de Kubernetes creados en el clúster por `up.sh`/`bootstrap.sh` (JWT, claves S3 aleatorias) | Nunca tocan git ni el disco del portátil; Sealed Secrets sigue disponible para versionarlos |
+| Almacén S3 interno | **SeaweedFS** (Apache 2.0, activo) | MinIO OSS está en mantenimiento: su repositorio está archivado (GitHub `archived: true`, última versión `RELEASE.2025-10-15`). SeaweedFS es un binario único con API S3 y fácil de ejecutar con identidad por Secret. Un S3 externo se configura con `--s3-endpoint/--s3-bucket` |
+| Respaldos | `CronJob` `pg_dump -Fc` a S3 + `scripts/vps/restore-drill.sh` (restaura en un PostgreSQL desechable y compara filas) | Portable a cualquier S3 y verificable de extremo a extremo. La integración nativa `barmanObjectStore` de CloudNativePG está en desuso a favor del plugin Barman Cloud; el PITR queda como mejora futura |
+| Operador CNPG en un nodo | `up.sh` fija `replicaCount: 1` si no hay `--agent` | Prod exige anti-afinidad estricta para 2 réplicas, que no se programa en un solo nodo |

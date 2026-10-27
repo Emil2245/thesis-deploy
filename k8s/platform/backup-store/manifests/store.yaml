@@ -1,0 +1,100 @@
+# Almacen S3 interno (SeaweedFS) para los respaldos de la base de datos del entorno vps. Una sola replica con PVC.
+# La identidad S3 (claves) vive en el Secret backup-store-s3-config, creado por scripts/vps/up.sh (nunca en git).
+# Para usar un S3 externo (AWS, Wasabi, Backblaze...) basta apuntar el Secret propuestas-backup-s3 a ese servicio; este almacen queda inactivo.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backup-store-data
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests: {storage: 10Gi}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backup-store
+  labels: {app.kubernetes.io/name: backup-store}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector:
+    matchLabels: {app.kubernetes.io/name: backup-store}
+  template:
+    metadata:
+      labels: {app.kubernetes.io/name: backup-store}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: seaweedfs
+          image: docker.io/chrislusf/seaweedfs:4.51
+          args:
+            - server
+            - -dir=/data
+            - -ip.bind=0.0.0.0
+            - -volume.max=8
+            - -master.volumeSizeLimitMB=512
+            - -s3
+            - -s3.port=8333
+            - -s3.config=/etc/s3/s3.json
+          ports:
+            - {name: s3, containerPort: 8333}
+          readinessProbe:
+            tcpSocket: {port: s3}
+            periodSeconds: 5
+          resources:
+            requests: {cpu: 50m, memory: 128Mi}
+            limits: {memory: 512Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          volumeMounts:
+            - {name: data, mountPath: /data}
+            - {name: tmp, mountPath: /tmp}
+            - {name: s3, mountPath: /etc/s3, readOnly: true}
+      volumes:
+        - name: data
+          persistentVolumeClaim: {claimName: backup-store-data}
+        - name: tmp
+          emptyDir: {}
+        - name: s3
+          secret: {secretName: backup-store-s3-config}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backup-store
+spec:
+  selector: {app.kubernetes.io/name: backup-store}
+  ports:
+    - {name: s3, port: 8333, targetPort: s3}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+spec:
+  podSelector: {}
+  policyTypes: [Ingress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-propuestas-to-s3
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/name: backup-store}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels: {kubernetes.io/metadata.name: propuestas}
+      ports:
+        - {port: 8333, protocol: TCP}

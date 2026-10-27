@@ -44,7 +44,7 @@ $S/cluster-prep.sh
 fase "7 Argo CD y GitOps (app-of-apps)"
 helm repo add argo https://argoproj.github.io/argo-helm >/dev/null 2>&1 || true
 helm repo update argo >/dev/null
-helm upgrade --install argocd argo/argo-cd -n argocd --create-namespace --version 10.11.1 -f k8s/argocd/values-aws.yaml --wait --timeout 10m
+helm upgrade --install argocd argo/argo-cd -n argocd --create-namespace --version 10.11.6 -f k8s/argocd/values-aws.yaml --wait --timeout 10m
 kubectl apply -f k8s/argocd/root-aws.yaml
 
 fase "8 espera a que todas las Applications estén Synced y Healthy"

@@ -1,0 +1,76 @@
+# Respaldo diario: pg_dump (formato custom) desde CNPG -> bucket S3-compatible. Destino y claves: Secret propuestas-backup-s3
+# (endpoint, bucket, access-key, secret-key). Por defecto el almacen interno (k8s/platform/backup-store).
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: propuestas-backup
+spec:
+  schedule: "17 3 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        metadata:
+          labels: {app.kubernetes.io/component: backup}
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 70
+            runAsGroup: 70
+            fsGroup: 70
+            seccompProfile: {type: RuntimeDefault}
+          initContainers:
+            - name: pg-dump
+              image: docker.io/library/postgres:18.6-alpine
+              command: ["/bin/sh", "-ec"]
+              args:
+                - |
+                  # el controlador de NetworkPolicy tarda unos segundos en admitir un pod nuevo: se reintenta hasta 60 s
+                  for i in $(seq 1 20); do pg_isready -q -h propuestas-db-rw && break; sleep 3; done
+                  pg_dump -h propuestas-db-rw -U "$DB_USER" -d propuestas -Fc -f /backup/propuestas-$(date -u +%Y%m%dT%H%M%SZ).dump
+              env:
+                - name: DB_USER
+                  valueFrom: {secretKeyRef: {name: propuestas-db-app, key: username}}
+                - name: PGPASSWORD
+                  valueFrom: {secretKeyRef: {name: propuestas-db-app, key: password}}
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities: {drop: [ALL]}
+              volumeMounts:
+                - {name: backup, mountPath: /backup}
+                - {name: tmp, mountPath: /tmp}
+          containers:
+            - name: s3-upload
+              image: docker.io/amazon/aws-cli:2.38.6
+              command: ["/bin/sh", "-ec"]
+              args:
+                - |
+                  aws --endpoint-url "$S3_ENDPOINT" s3api head-bucket --bucket "$S3_BUCKET" 2>/dev/null || aws --endpoint-url "$S3_ENDPOINT" s3 mb "s3://$S3_BUCKET"
+                  aws --endpoint-url "$S3_ENDPOINT" s3 cp /backup/ "s3://$S3_BUCKET/db/" --recursive
+              env:
+                - {name: AWS_DEFAULT_REGION, value: us-east-1}
+                - {name: HOME, value: /tmp}
+                - name: S3_ENDPOINT
+                  valueFrom: {secretKeyRef: {name: propuestas-backup-s3, key: endpoint}}
+                - name: S3_BUCKET
+                  valueFrom: {secretKeyRef: {name: propuestas-backup-s3, key: bucket}}
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom: {secretKeyRef: {name: propuestas-backup-s3, key: access-key}}
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom: {secretKeyRef: {name: propuestas-backup-s3, key: secret-key}}
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities: {drop: [ALL]}
+              volumeMounts:
+                - {name: backup, mountPath: /backup}
+                - {name: tmp, mountPath: /tmp}
+          volumes:
+            - {name: backup, emptyDir: {}}
+            - {name: tmp, emptyDir: {}}

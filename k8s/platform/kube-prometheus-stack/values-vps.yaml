@@ -1,0 +1,9 @@
+# Se suma a values.yaml solo en el entorno vps. Host y emisor son de ejemplo: up.sh los sustituye con valuesObject (--domain/--issuer).
+grafana:
+  ingress:
+    annotations:
+      cert-manager.io/cluster-issuer: selfsigned-ca
+    hosts: [grafana.example.invalid]
+    tls:
+      - secretName: grafana-tls
+        hosts: [grafana.example.invalid]

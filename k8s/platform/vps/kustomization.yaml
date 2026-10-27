@@ -1,0 +1,22 @@
+# Entorno "vps": como prod (mismas plataformas) mas el almacen S3 interno para respaldos, con el overlay propuestas-vps.
+# El dominio, el emisor TLS y el correo ACME NO estan aqui: los inyecta scripts/vps/up.sh como parches de la Application raiz.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../cnpg-operator
+  - ../cert-manager
+  - ../sealed-secrets
+  - ../kube-prometheus-stack
+  - ../issuers
+  - ../loki
+  - ../tempo
+  - ../alloy
+  - ../dashboards
+  - ../backup-store
+  - ../../apps/propuestas-vps
+patches:
+  - target: {kind: Application, name: kube-prometheus-stack}
+    patch: |-
+      - op: add
+        path: /spec/sources/0/helm/valueFiles/-
+        value: $values/k8s/platform/kube-prometheus-stack/values-vps.yaml
