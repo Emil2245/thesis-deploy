@@ -1,0 +1,19 @@
+# Raiz del entorno "vps" (VPS generico con k3s). scripts/vps/up.sh renderiza esta Application anadiendo parches kustomize en linea
+# (dominio, emisor TLS, correo ACME, replicas de la base, repo/rama) para que el repositorio siga siendo generico.
+# Aplicada tal cual (sin up.sh) usa los valores de ejemplo de overlays/vps (propuestas.example.invalid, emisor selfsigned-ca).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/emil2245/thesis-deploy
+    targetRevision: main
+    path: k8s/platform/vps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}

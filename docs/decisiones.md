@@ -21,7 +21,7 @@
 
 ## Notas de implementación
 
-- Versiones fijadas: k3s `v1.37.1-k3s1`, Argo CD chart `10.11.1`, chart `cloudnative-pg` `0.29.1`, PostgreSQL `ghcr.io/cloudnative-pg/postgresql:18.6`.
+- Versiones fijadas: k3s `v1.37.1-k3s1`, Argo CD chart `10.11.6`, chart `cloudnative-pg` `0.29.1`, PostgreSQL `ghcr.io/cloudnative-pg/postgresql:18.6`.
 - Plan 009, charts de plataforma (Application por directorio, `values.yaml` junto a cada una, multi-source `$values` de Argo CD):
 
   | Chart | Repo | Versión | Namespace | Wave |

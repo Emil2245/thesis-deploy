@@ -55,3 +55,26 @@ spec:
       - http01:
           ingress:
             ingressClassName: traefik
+---
+# CA autofirmada para redes privadas / laboratorio (plan 041): sin dominio publico no hay ACME.
+# El certificado raiz se obtiene con: kubectl -n cert-manager get secret selfsigned-ca -o jsonpath='{.data.ca\.crt}' | base64 -d
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: selfsigned-ca
+  namespace: cert-manager
+spec:
+  isCA: true
+  commonName: propuestas-selfsigned-ca
+  secretName: selfsigned-ca
+  duration: 87600h
+  privateKey: {algorithm: ECDSA, size: 256}
+  issuerRef: {name: selfsigned, kind: ClusterIssuer, group: cert-manager.io}
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: selfsigned-ca
+spec:
+  ca:
+    secretName: selfsigned-ca
