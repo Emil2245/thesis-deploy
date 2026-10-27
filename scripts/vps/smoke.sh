@@ -27,7 +27,7 @@ na=$(kubectl -n argocd get applications --no-headers | wc -l)
 # 2. TLS
 for c in propuestas-tls; do s=$(kubectl -n propuestas get certificate "$c" -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null); [ "$s" = True ] && ok "Certificate $c Ready (emisor $VPS_ISSUER)" || bad "Certificate $c: $s"; done
 r=$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' -m 20 --resolve "$H:80:$VPS_IP" "http://$H/")
-case "$r" in "308 https://$H/"*|"301 https://$H/"*) ok "HTTP redirige a HTTPS (Traefik responde 308): $r";; *) bad "redireccion HTTP->HTTPS: $r";; esac
+case "$r" in "308 https://$H/"*|"301 https://$H/"*) ok "HTTP redirige a HTTPS (Traefik: 301 con GET, 308 con HEAD): $r";; *) bad "redireccion HTTP->HTTPS: $r";; esac
 # 3. Aplicacion por HTTPS (certificado verificado)
 for p in / /api/v1/config/display /privacidad; do
   c=$("${C[@]}" -o /dev/null -w '%{http_code}' "https://$H$p" 2>/dev/null); [ "$c" = 200 ] && ok "GET https://$H$p -> 200" || bad "GET $p -> $c"
