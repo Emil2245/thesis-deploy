@@ -52,24 +52,7 @@ fase "7 Argo CD y GitOps (app-of-apps)"
 helm repo add argo https://argoproj.github.io/argo-helm >/dev/null 2>&1 || true
 helm repo update argo >/dev/null
 helm upgrade --install argocd argo/argo-cd -n argocd --create-namespace --version 10.11.6 -f k8s/argocd/values-aws.yaml --wait --timeout 10m
-# raiz parametrizada: parches kustomize en linea sobre las Applications (mismo mecanismo que scripts/vps/up.sh)
-APPS=$(kubectl kustomize k8s/apps/propuestas-aws | kubectl create --dry-run=client -f - -o json | jq -s '{items: [.[] | if .items then .items[] else . end]}')
-ROOT=$(kubectl apply --dry-run=client -f k8s/argocd/root-aws.yaml -o json)
-DEFREPO=https://github.com/emil2245/thesis-deploy
-PATCHES=$(jq -n --argjson apps "$APPS" --arg cors "http://$FLOCI_IP:8080,https://$FLOCI_IP:8443" --arg repo "$REPO" --arg rev "$REVISION" --arg defrepo "$DEFREPO" '
-  def isrepo(a): (a.spec.source // null) != null and (a.spec.source.repoURL == $defrepo);
-  def repo_ops(a):
-    ( if isrepo(a) then [{op:"replace",path:"/spec/source/repoURL",value:$repo},{op:"replace",path:"/spec/source/targetRevision",value:$rev}] else [] end )
-    + ( (a.spec.sources // []) | to_entries | map(select(.value.repoURL == $defrepo)) | map(.key as $i | [{op:"replace",path:"/spec/sources/\($i)/repoURL",value:$repo},{op:"replace",path:"/spec/sources/\($i)/targetRevision",value:$rev}]) | flatten );
-  def extra(name):
-    if name == "propuestas" then [{op:"add",path:"/spec/source/kustomize",value:{patches:[
-      {target:{kind:"ConfigMap",name:"propuestas-api-config"},patch:([{op:"replace",path:"/data/CORS_ORIGINS",value:$cors}]|tojson)}]}}]
-    else [] end;
-  [ $apps.items[] | select(.kind=="Application") | . as $a | {name:.metadata.name, ops:((if ($repo != $defrepo or $rev != "main") then repo_ops($a) else [] end) + extra(.metadata.name))}
-    | select(.ops|length>0) | {target:{kind:"Application",name:.name},patch:(.ops|tojson)} ]')
-jq --argjson p "$PATCHES" --arg repo "$REPO" --arg rev "$REVISION" \
-  '.spec.source.repoURL=$repo | .spec.source.targetRevision=$rev | .spec.source.kustomize={patches:$p}' <<<"$ROOT" | kubectl apply -f - >/dev/null
-echo "Application root aplicada (CORS=http://$FLOCI_IP:8080,https://$FLOCI_IP:8443; repo $REPO, rama $REVISION; $(jq length <<<"$PATCHES") parches en linea)"
+$S/root.sh --revision "$REVISION" --repo "$REPO"
 
 fase "8 espera a que todas las Applications estén Synced y Healthy"
 for _ in $(seq 1 120); do
