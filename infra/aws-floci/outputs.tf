@@ -13,3 +13,4 @@ output "pod_role_arns" { value = { for k, r in aws_iam_role.pod : k => r.arn } }
 output "log_group" { value = aws_cloudwatch_log_group.api.name }
 output "alb_https_port" { value = var.alb_https_port }
 output "alb_ca_pem" { value = tls_self_signed_cert.ca.cert_pem }
+output "alb_redirect_http" { value = var.alb_redirect_http }

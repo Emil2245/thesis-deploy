@@ -56,3 +56,13 @@ variable "node_count" {
   default     = 2
   description = "Nodos de trabajo del grupo (G1). Floci solo materializa un nodo k3s por clúster; ver docs/evidencias/aws-floci-2026-10-v2.md."
 }
+
+variable "alb_redirect_http" {
+  type        = bool
+  default     = false
+  description = <<-EOT
+    true: el listener HTTP redirige (301) al HTTPS. Floci 2.3.0 declara el listener HTTPS (certificado ACM) pero NO termina TLS en el
+    puerto (responde HTTP plano: "curl: (35) wrong version number"); la terminación existe en main, posterior a 2.3.0. Con 2.3.0 se deja
+    en false (HTTP reenvía a la app) y se pasa a true al actualizar Floci.
+  EOT
+}

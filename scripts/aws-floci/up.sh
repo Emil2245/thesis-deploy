@@ -12,8 +12,8 @@ fase() { printf '\n== [%ss] fase %s\n' $((SECONDS-t0)) "$*"; }
 
 for c in aws tofu kubectl helm jq skopeo ssh curl openssl; do command -v "$c" >/dev/null || { echo "falta la herramienta: $c" >&2; exit 1; }; done
 OVERLAY=k8s/propuestas/overlays/aws/kustomization.yaml
-if ! grep -q "CORS_ORIGINS=https://$FLOCI_IP:8443" "$OVERLAY"; then
-  echo "El overlay aws fija CORS_ORIGINS a otra IP. Edite $OVERLAY (CORS_ORIGINS=https://$FLOCI_IP:8443), haga commit y push, y repita." >&2
+if ! grep -q "CORS_ORIGINS=http://$FLOCI_IP:8080,https://$FLOCI_IP:8443" "$OVERLAY"; then
+  echo "El overlay aws fija CORS_ORIGINS a otra IP. Edite $OVERLAY (CORS_ORIGINS=http://$FLOCI_IP:8080,https://$FLOCI_IP:8443), haga commit y push, y repita." >&2
   exit 1
 fi
 API_TAG=$(awk '/propuestas-api/{f=1} f&&/newTag/{print $2; exit}' "$OVERLAY")
@@ -60,4 +60,4 @@ kubectl -n propuestas rollout status deploy/propuestas-api --timeout=600s
 kubectl -n propuestas rollout status deploy/propuestas-web --timeout=300s
 
 if [ "${1:-}" != "--skip-smoke" ]; then fase "9 smoke"; $S/smoke.sh; fi
-printf '\nListo en %ss: https://%s:%s (ALB emulado; importe la CA: scripts/aws-floci/ca.sh)\n' $((SECONDS-t0)) "$FLOCI_IP" 8443
+printf '\nListo en %ss: http://%s:8080 (ALB emulado; HTTPS 8443 declarado, ver variables.tf)\n' $((SECONDS-t0)) "$FLOCI_IP"

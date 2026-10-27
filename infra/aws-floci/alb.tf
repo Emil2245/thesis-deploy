@@ -63,16 +63,21 @@ resource "aws_lb_listener" "https" {
   }
 }
 
+# HTTP: redirige a HTTPS cuando el emulador termina TLS (var.alb_redirect_http); si no, reenvía (ver variables.tf).
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.main.arn
   port              = var.alb_port
   protocol          = "HTTP"
   default_action {
-    type = "redirect"
-    redirect {
-      port        = tostring(var.alb_https_port)
-      protocol    = "HTTPS"
-      status_code = "HTTP_301"
+    type             = var.alb_redirect_http ? "redirect" : "forward"
+    target_group_arn = var.alb_redirect_http ? null : aws_lb_target_group.ingress.arn
+    dynamic "redirect" {
+      for_each = var.alb_redirect_http ? [1] : []
+      content {
+        port        = tostring(var.alb_https_port)
+        protocol    = "HTTPS"
+        status_code = "HTTP_301"
+      }
     }
   }
 }

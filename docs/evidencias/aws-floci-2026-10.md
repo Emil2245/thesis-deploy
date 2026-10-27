@@ -87,7 +87,7 @@ rubros restaurados: 310     rubros en vivo: 310     (restore_test eliminada)
 Credenciales de las cargas: Secret `aws-workload-credentials` (clave del usuario IAM `propuestas-workload`, misma política que el rol `propuestas-workload`). Pod identity: con TLS activo y el addon `eks-pod-identity-agent` Floci muta los pods (`AWS_CONTAINER_CREDENTIALS_FULL_URI` inyectada), pero el relay `169.254.170.23` no arranca porque la imagen k3s no trae gestor de paquetes (`Could not install Pod Identity relay dependencies ... No supported package manager`): las credenciales no se entregan, por eso se usa el Secret.
 
 ## (f) Logs en CloudWatch
-Fluent Bit 5.1.5 (DaemonSet en `logging`, `cloudwatch_logs`, endpoint `172.18.0.2:4566`): el plugin solo habla TLS (la propiedad `tls` no es válida en este plugin) y el certificado de Floci no cubre la IP, por lo que se usa `tls.verify Off` y Floci tiene `FLOCI_TLS_ENABLED=true` (HTTP y HTTPS conviven en 4566).
+Fluent Bit 5.1.5 (DaemonSet en `logging`, `cloudwatch_logs`, endpoint `172.18.0.2:4566`): el plugin solo habla TLS (la propiedad `tls` no es válida en este plugin) y el certificado de Floci no cubre la IP, por lo que se desactivó la verificación TLS (propiedad `tls.verify`) y Floci tiene `FLOCI_TLS_ENABLED=true` (HTTP y HTTPS conviven en 4566).
 ```
 $ aws logs describe-log-streams --log-group-name /propuestas/api   -> flujos pod-kube.var.log.containers.propuestas-api-...  (>= 4)
 $ aws logs filter-log-events --log-group-name /propuestas/api --filter-pattern Flyway

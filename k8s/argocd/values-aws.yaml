@@ -1,6 +1,13 @@
 configs:
   params:
     server.insecure: true
+  cm:
+    # Traefik se expone por NodePort (sin IP de LoadBalancer en status): sin esto el Ingress quedaría "Progressing" para siempre
+    resource.customizations.health.networking.k8s.io_Ingress: |
+      hs = {}
+      hs.status = "Healthy"
+      hs.message = "Ingress atendido por Traefik (NodePort tras el ALB)"
+      return hs
 dex:
   enabled: false
 notifications:
