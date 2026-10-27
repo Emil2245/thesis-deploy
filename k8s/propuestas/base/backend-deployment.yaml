@@ -37,7 +37,15 @@ spec:
         # Misma imagen (la reescribe kustomize `images`), solo bash y /dev/tcp; sin herramientas nuevas.
         - name: esperar-db
           image: ghcr.io/emil2245/propuestas-api
-          command: ["bash", "-c", "until (exec 3<>/dev/tcp/propuestas-db-rw/5432) 2>/dev/null; do echo 'esperando propuestas-db-rw:5432'; sleep 3; done"]
+          env:
+            - {name: DB_URL, value: "jdbc:postgresql://propuestas-db-rw:5432/propuestas"}
+          # host y puerto se derivan del mismo DB_URL que usa la API (cada overlay lo parchea en ambos contenedores)
+          command:
+            - bash
+            - -c
+            - |
+              u=${DB_URL#jdbc:postgresql://}; hp=${u%%/*}; host=${hp%%:*}; port=${hp##*:}; [ "$port" = "$hp" ] && port=5432
+              until (exec 3<>/dev/tcp/$host/$port) 2>/dev/null; do echo "esperando $host:$port"; sleep 3; done
           resources:
             requests: {cpu: 10m, memory: 16Mi}
             limits: {memory: 64Mi}
