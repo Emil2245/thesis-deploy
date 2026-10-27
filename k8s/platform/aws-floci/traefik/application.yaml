@@ -1,0 +1,50 @@
+# Ingress controller (G5, plan 040). NodePort fijo 30080: el ALB (infra/aws-floci/alb.tf) reparte a ese puerto en TODOS los nodos.
+# TLS lo termina el ALB; Traefik habla HTTP.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-4"
+spec:
+  project: default
+  source:
+    repoURL: https://traefik.github.io/charts
+    chart: traefik
+    targetRevision: 42.1.3
+    helm:
+      valuesObject:
+        deployment:
+          replicas: 2
+        service:
+          spec:
+            type: NodePort   # con LoadBalancer el servicelb de k3s captura :80 de TODO destino (rompe el relay 169.254.170.23)
+        ports:
+          web:
+            nodePort: 30080
+          websecure:
+            expose:
+              default: false
+        providers:
+          kubernetesIngress:
+            publishedService:
+              enabled: false
+        ingressClass:
+          enabled: true
+          isDefaultClass: true
+        resources:
+          requests: {cpu: 50m, memory: 64Mi}
+        topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: ScheduleAnyway
+            labelSelector:
+              matchLabels: {app.kubernetes.io/name: traefik}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: traefik
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}
+    syncOptions: [CreateNamespace=true, ServerSideApply=true]
+    retry: {limit: 10, backoff: {duration: 15s, factor: 2, maxDuration: 3m}}

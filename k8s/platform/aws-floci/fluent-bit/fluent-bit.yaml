@@ -7,6 +7,12 @@ metadata:
     pod-security.kubernetes.io/enforce: privileged   # hostPath /var/log
 ---
 apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: fluent-bit
+  namespace: logging
+---
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: fluent-bit-config
@@ -31,11 +37,12 @@ data:
         log_group_name    /propuestas/api
         log_stream_prefix pod-
         auto_create_group Off
-        endpoint          172.18.0.2
+        endpoint          floci
         port              4566
-        # Floci sirve HTTPS en 4566 (FLOCI_TLS_ENABLED); el plugin usa TLS siempre ("tls" no es una propiedad válida aquí)
-        # y el cert de Floci no cubre la IP, de ahí tls.verify Off (solo en este entorno emulado)
-        tls.verify        Off
+        # TLS verificado (G4): el certificado de Floci cubre el nombre "floci" (CoreDNS) y su CA va montada desde el ConfigMap floci-ca
+        tls.verify        On
+        tls.ca_file       /floci/ca.pem
+        sts_endpoint      https://floci:4566
   parsers.conf: |
     [PARSER]
         Name   noop
@@ -58,6 +65,7 @@ spec:
       labels:
         app.kubernetes.io/name: fluent-bit
     spec:
+      serviceAccountName: fluent-bit
       securityContext:
         seccompProfile: {type: RuntimeDefault}
       containers:
@@ -67,10 +75,7 @@ spec:
           args: ["-c", "/fluent-bit/etc/fluent-bit.conf"]
           env:
             - {name: AWS_REGION, value: us-east-1}
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom: {secretKeyRef: {name: aws-workload-credentials, key: AWS_ACCESS_KEY_ID}}
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom: {secretKeyRef: {name: aws-workload-credentials, key: AWS_SECRET_ACCESS_KEY}}
+            # credenciales: pod identity (SA fluent-bit -> rol propuestas-logs), inyectadas por Floci y entregadas por el relay
           securityContext:
             runAsUser: 0   # lee /var/log/pods del nodo (hostPath de solo lectura)
             allowPrivilegeEscalation: false
@@ -83,6 +88,7 @@ spec:
             - {name: config, mountPath: /fluent-bit/etc}
             - {name: varlog, mountPath: /var/log, readOnly: true}
             - {name: tmp, mountPath: /tmp}
+            - {name: ca, mountPath: /floci, readOnly: true}
       volumes:
         - name: config
           configMap: {name: fluent-bit-config}
@@ -90,3 +96,5 @@ spec:
           hostPath: {path: /var/log}
         - name: tmp
           emptyDir: {}
+        - name: ca
+          configMap: {name: floci-ca}

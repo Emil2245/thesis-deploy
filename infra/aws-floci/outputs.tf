@@ -9,5 +9,8 @@ output "secret_arns" {
 }
 output "backups_bucket" { value = aws_s3_bucket.backups.bucket }
 output "kms_key_alias" { value = aws_kms_alias.main.name }
-output "workload_role_arn" { value = aws_iam_role.workload.arn }
+output "pod_role_arns" { value = { for k, r in aws_iam_role.pod : k => r.arn } }
 output "log_group" { value = aws_cloudwatch_log_group.api.name }
+output "alb_https_port" { value = var.alb_https_port }
+output "alb_ca_pem" { value = tls_self_signed_cert.ca.cert_pem }
+output "alb_redirect_http" { value = var.alb_redirect_http }

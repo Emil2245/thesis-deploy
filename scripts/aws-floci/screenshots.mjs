@@ -1,11 +1,11 @@
 // Capturas de la consola web de Floci y de la app vía ALB. Uso:
-//   PW_MODULES_FROM=<dir con playwright/package.json> node scripts/aws-floci/screenshots.mjs [ip]
+//   PW_MODULE=<ruta a playwright o playwright-core> [OUT=<dir>] node scripts/aws-floci/screenshots.mjs [ip]
 // Solo listados (nombres); no se abre ningún secreto ni se escribe ningún campo de contraseña.
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
-const { chromium } = createRequire(process.env.PW_MODULES_FROM + '/package.json')('playwright');
-const ip = process.argv[2] || '192.168.1.12';
-const out = 'docs/evidencias/aws-floci'; fs.mkdirSync(out, { recursive: true });
+const { chromium } = createRequire(import.meta.url)(process.env.PW_MODULE || 'playwright');
+const ip = process.argv[2] || '192.168.1.13';
+const out = process.env.OUT || 'docs/evidencias/aws-floci'; fs.mkdirSync(out, { recursive: true });
 const pages = [
   ['01-consola-inicio', `http://${ip}:4500/console/aws`],
   ['02-eks', `http://${ip}:4500/cloud-explorer/aws/k8s`],

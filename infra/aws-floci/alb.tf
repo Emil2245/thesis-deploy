@@ -10,6 +10,10 @@ data "aws_instances" "nodes" {
   }
 }
 
+locals {
+  public_ip = regex("//([^:/]+)", var.floci_endpoint)[0]
+}
+
 resource "aws_lb" "main" {
   name               = "propuestas"
   load_balancer_type = "application"
@@ -19,10 +23,12 @@ resource "aws_lb" "main" {
   tags               = local.tags
 }
 
-resource "aws_lb_target_group" "web" {
-  name        = "propuestas-web"
+# Un solo target group: el NodePort de Traefik (G5) en TODOS los nodos. Los nodos adicionales (add-workers.sh) tienen IP fija
+# 172.18.0.20x en la red docker de Floci.
+resource "aws_lb_target_group" "ingress" {
+  name        = "propuestas-ingress"
   protocol    = "HTTP"
-  port        = var.nodeport_web
+  port        = var.nodeport_ingress
   vpc_id      = aws_vpc.main.id
   target_type = "ip"
   health_check {
@@ -32,61 +38,91 @@ resource "aws_lb_target_group" "web" {
   tags = local.tags
 }
 
-resource "aws_lb_target_group" "api" {
-  name        = "propuestas-api"
-  protocol    = "HTTP"
-  port        = var.nodeport_api
-  vpc_id      = aws_vpc.main.id
-  target_type = "ip"
-  health_check {
-    path    = "/api/v1/config/display"
-    matcher = "200"
+resource "aws_lb_target_group_attachment" "ingress" {
+  count             = var.node_count
+  target_group_arn  = aws_lb_target_group.ingress.arn
+  target_id         = count.index == 0 ? data.aws_instances.nodes.private_ips[0] : "172.18.0.${200 + count.index}"
+  availability_zone = "all"
+  port              = var.nodeport_ingress
+}
+
+# HTTPS (G6): certificado importado en ACM (CA propia generada abajo). HTTP solo redirige.
+resource "aws_lb_listener" "https" {
+  load_balancer_arn = aws_lb.main.arn
+  port              = var.alb_https_port
+  protocol          = "HTTPS"
+  certificate_arn   = aws_acm_certificate.main.arn
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.ingress.arn
   }
-  tags = local.tags
 }
 
-resource "aws_lb_target_group_attachment" "web" {
-  target_group_arn  = aws_lb_target_group.web.arn
-  target_id         = data.aws_instances.nodes.private_ips[0]
-  availability_zone = "all"
-  port              = var.nodeport_web
-}
-
-resource "aws_lb_target_group_attachment" "api" {
-  target_group_arn  = aws_lb_target_group.api.arn
-  target_id         = data.aws_instances.nodes.private_ips[0]
-  availability_zone = "all"
-  port              = var.nodeport_api
-}
-
+# HTTP: redirige a HTTPS cuando el emulador termina TLS (var.alb_redirect_http); si no, reenvía (ver variables.tf).
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.main.arn
   port              = var.alb_port
   protocol          = "HTTP"
   default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.web.arn
-  }
-}
-
-resource "aws_lb_listener_rule" "api" {
-  listener_arn = aws_lb_listener.http.arn
-  priority     = 10
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.api.arn
-  }
-  condition {
-    path_pattern {
-      values = ["/api/*"]
+    type             = var.alb_redirect_http ? "redirect" : "forward"
+    target_group_arn = var.alb_redirect_http ? null : aws_lb_target_group.ingress.arn
+    dynamic "redirect" {
+      for_each = var.alb_redirect_http ? [1] : []
+      content {
+        port        = tostring(var.alb_https_port)
+        protocol    = "HTTPS"
+        status_code = "HTTP_301"
+      }
     }
   }
 }
 
 # ---------------------------------------------------------------- ACM + Route53 (emulados)
+# CA propia + certificado de servidor para el ALB (SAN: IP de la VM, nombre interno y localhost). El navegador solo confía
+# tras importar la CA (output alb_ca_pem). En AWS real: certificado público de ACM validado por DNS.
+resource "tls_private_key" "ca" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+resource "tls_self_signed_cert" "ca" {
+  private_key_pem       = tls_private_key.ca.private_key_pem
+  is_ca_certificate     = true
+  validity_period_hours = 8760
+  allowed_uses          = ["cert_signing", "crl_signing"]
+  subject {
+    common_name  = "Propuestas aws-floci CA"
+    organization = "propuestas"
+  }
+}
+
+resource "tls_private_key" "alb" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+resource "tls_cert_request" "alb" {
+  private_key_pem = tls_private_key.alb.private_key_pem
+  dns_names       = ["app.propuestas.aws.internal", "localhost"]
+  ip_addresses    = [local.public_ip]
+  subject {
+    common_name = "app.propuestas.aws.internal"
+  }
+}
+
+resource "tls_locally_signed_cert" "alb" {
+  cert_request_pem      = tls_cert_request.alb.cert_request_pem
+  ca_private_key_pem    = tls_private_key.ca.private_key_pem
+  ca_cert_pem           = tls_self_signed_cert.ca.cert_pem
+  validity_period_hours = 8760
+  allowed_uses          = ["digital_signature", "key_encipherment", "server_auth"]
+}
+
 resource "aws_acm_certificate" "main" {
-  domain_name       = "propuestas.aws.internal"
-  validation_method = "DNS"
+  private_key       = tls_private_key.alb.private_key_pem
+  certificate_body  = tls_locally_signed_cert.alb.cert_pem
+  certificate_chain = tls_self_signed_cert.ca.cert_pem
   tags              = local.tags
 }
 

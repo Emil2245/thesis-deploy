@@ -1,6 +1,6 @@
 # Variables comunes para los helpers de aws-floci (se hace `source`).
 # FLOCI = endpoint del emulador (IP de la VM aws-lab-1). Credenciales ficticias (no son secretos).
-: "${FLOCI_IP:=192.168.1.12}"
+: "${FLOCI_IP:=192.168.1.13}"
 : "${FLOCI:=http://$FLOCI_IP:4566}"
 export FLOCI FLOCI_IP
 # Credenciales del operador (clave de acceso IAM creada por kubeconfig.sh; fuera de git). Floci rechaza test/test para EKS.

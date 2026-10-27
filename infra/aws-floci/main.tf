@@ -31,11 +31,17 @@ resource "aws_security_group" "cluster" {
 
 resource "aws_security_group" "alb" {
   name        = "propuestas-alb"
-  description = "ALB HTTP"
+  description = "ALB HTTP/HTTPS"
   vpc_id      = aws_vpc.main.id
   ingress {
     from_port   = var.alb_port
     to_port     = var.alb_port
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = var.alb_https_port
+    to_port     = var.alb_https_port
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -87,41 +93,88 @@ data "aws_iam_policy_document" "pods_assume" {
   }
 }
 
-# Rol de las cargas de propuestas (pod identity): leer sus secretos y escribir respaldos en S3.
-resource "aws_iam_role" "workload" {
-  name               = "propuestas-workload"
+# Roles de pod identity (G2, plan 040): cada carga asume SU rol con credenciales temporales; no hay claves estáticas.
+#   propuestas-workload (ns propuestas, SA propuestas-workload): respaldos a S3.
+#   propuestas-logs     (ns logging, SA fluent-bit): escribir en CloudWatch Logs.
+#   propuestas-eso      (ns external-secrets, SA external-secrets): leer Secrets Manager (External Secrets Operator).
+locals {
+  pod_roles = {
+    workload = {
+      name = "propuestas-workload"
+      ns   = "propuestas"
+      sa   = "propuestas-workload"
+    }
+    logs = {
+      name = "propuestas-logs"
+      ns   = "logging"
+      sa   = "fluent-bit"
+    }
+    eso = {
+      name = "propuestas-eso"
+      ns   = "external-secrets"
+      sa   = "external-secrets"
+    }
+  }
+}
+
+resource "aws_iam_role" "pod" {
+  for_each           = local.pod_roles
+  name               = each.value.name
   assume_role_policy = data.aws_iam_policy_document.pods_assume.json
   tags               = local.tags
 }
 
-data "aws_iam_policy_document" "workload" {
-  statement {
-    actions   = ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"]
-    resources = [aws_secretsmanager_secret.db.arn, aws_secretsmanager_secret.jwt.arn]
+data "aws_iam_policy_document" "pod" {
+  for_each = local.pod_roles
+
+  dynamic "statement" {
+    for_each = each.key == "workload" ? [1] : []
+    content {
+      actions   = ["s3:PutObject", "s3:GetObject", "s3:ListBucket"]
+      resources = [aws_s3_bucket.backups.arn, "${aws_s3_bucket.backups.arn}/*"]
+    }
   }
-  statement {
-    actions   = ["s3:PutObject", "s3:GetObject", "s3:ListBucket"]
-    resources = [aws_s3_bucket.backups.arn, "${aws_s3_bucket.backups.arn}/*"]
+  dynamic "statement" {
+    for_each = each.key == "workload" ? [1] : []
+    content {
+      actions   = ["kms:Decrypt", "kms:GenerateDataKey"]
+      resources = [aws_kms_key.main.arn]
+    }
   }
-  statement {
-    actions   = ["kms:Decrypt", "kms:GenerateDataKey"]
-    resources = [aws_kms_key.main.arn]
+  dynamic "statement" {
+    for_each = each.key == "logs" ? [1] : []
+    content {
+      actions   = ["logs:CreateLogStream", "logs:PutLogEvents", "logs:DescribeLogStreams"]
+      resources = [aws_cloudwatch_log_group.api.arn, "${aws_cloudwatch_log_group.api.arn}:*"]
+    }
   }
-  statement {
-    actions   = ["logs:CreateLogStream", "logs:PutLogEvents", "logs:DescribeLogStreams"]
-    resources = ["${aws_cloudwatch_log_group.api.arn}:*"]
+  dynamic "statement" {
+    for_each = each.key == "eso" ? [1] : []
+    content {
+      actions   = ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"]
+      resources = [aws_secretsmanager_secret.db.arn, aws_secretsmanager_secret.jwt.arn]
+    }
+  }
+  dynamic "statement" {
+    for_each = each.key == "eso" ? [1] : []
+    content {
+      actions   = ["kms:Decrypt"]
+      resources = [aws_kms_key.main.arn]
+    }
   }
 }
 
-resource "aws_iam_policy" "workload" {
-  name   = "propuestas-workload"
-  policy = data.aws_iam_policy_document.workload.json
-  tags   = local.tags
+resource "aws_iam_policy" "pod" {
+  for_each = local.pod_roles
+  name     = each.value.name
+  policy   = data.aws_iam_policy_document.pod[each.key].json
+  tags     = local.tags
 }
 
-resource "aws_iam_role_policy_attachment" "workload" {
-  role       = aws_iam_role.workload.name
-  policy_arn = aws_iam_policy.workload.arn
+resource "aws_iam_role_policy_attachment" "pod" {
+  for_each   = local.pod_roles
+  role       = aws_iam_role.pod[each.key].name
+  policy_arn = aws_iam_policy.pod[each.key].arn
 }
 
 # ---------------------------------------------------------------- ECR
@@ -155,11 +208,13 @@ resource "aws_eks_cluster" "main" {
   depends_on = [aws_iam_role_policy_attachment.eks_cluster]
 }
 
-resource "aws_eks_pod_identity_association" "api" {
+resource "aws_eks_pod_identity_association" "pod" {
+  for_each        = local.pod_roles
   cluster_name    = aws_eks_cluster.main.name
-  namespace       = "propuestas"
-  service_account = "propuestas-workload"
-  role_arn        = aws_iam_role.workload.arn
+  namespace       = each.value.ns
+  service_account = each.value.sa
+  role_arn        = aws_iam_role.pod[each.key].arn
+  depends_on      = [aws_eks_addon.pod_identity_agent]
 }
 
 # ---------------------------------------------------------------- RDS
@@ -263,23 +318,54 @@ resource "aws_cloudwatch_log_group" "api" {
   tags              = local.tags
 }
 
-# ---------------------------------------------------------------- credenciales de las cargas (sustituto de pod identity)
-# Floci no inyecta credenciales de pod identity sin TLS (ver docs/evidencias/aws-floci-2026-10.md):
-# el CronJob de respaldos y Fluent Bit usan la clave de este usuario IAM, con la MISMA política que el rol
-# propuestas-workload. La clave de acceso la crea scripts/aws-floci/sync-secrets.sh (no vive en el estado).
-resource "aws_iam_user" "workload" {
-  name = "propuestas-workload"
-  tags = local.tags
-}
-
-resource "aws_iam_user_policy_attachment" "workload" {
-  user       = aws_iam_user.workload.name
-  policy_arn = aws_iam_policy.workload.arn
-}
-
 # Sin este addon Floci no muta los pods (igual que EKS real: la asociación solo surte efecto con el agente instalado).
+# En Floci el addon es solo metadato; el relay 169.254.170.23 lo aporta k8s/platform/aws-floci/pod-identity-relay.
 resource "aws_eks_addon" "pod_identity_agent" {
   cluster_name = aws_eks_cluster.main.name
   addon_name   = "eks-pod-identity-agent"
   tags         = local.tags
+}
+
+# ---------------------------------------------------------------- nodos de trabajo (G1, plan 040)
+data "aws_iam_policy_document" "ec2_assume" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "node" {
+  name               = "propuestas-eks-node"
+  assume_role_policy = data.aws_iam_policy_document.ec2_assume.json
+  tags               = local.tags
+}
+
+resource "aws_iam_role_policy_attachment" "node" {
+  for_each = toset([
+    "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
+    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+    "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+  ])
+  role       = aws_iam_role.node.name
+  policy_arn = each.value
+}
+
+resource "aws_eks_node_group" "workers" {
+  cluster_name    = aws_eks_cluster.main.name
+  node_group_name = "workers"
+  node_role_arn   = aws_iam_role.node.arn
+  subnet_ids      = [aws_subnet.a.id, aws_subnet.b.id]
+  instance_types  = [var.node_instance_type]
+
+  scaling_config {
+    desired_size = var.node_count
+    min_size     = var.node_count
+    max_size     = var.node_count + 1
+  }
+
+  tags       = local.tags
+  depends_on = [aws_iam_role_policy_attachment.node]
 }
