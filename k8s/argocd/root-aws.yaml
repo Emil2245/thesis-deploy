@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/emil2245/thesis-deploy
-    targetRevision: main
+    targetRevision: feat/040-floci-sin-brechas
     path: k8s/apps/propuestas-aws
   destination:
     server: https://kubernetes.default.svc

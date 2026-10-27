@@ -18,9 +18,9 @@ patches:
         value: 92.14.0
       - op: replace
         path: /spec/sources/1/targetRevision
-        value: main
+        value: feat/040-floci-sin-brechas
   - target: {kind: Application, name: tempo}
     patch: |-
       - op: replace
         path: /spec/sources/1/targetRevision
-        value: main
+        value: feat/040-floci-sin-brechas
