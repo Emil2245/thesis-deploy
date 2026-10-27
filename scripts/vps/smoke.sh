@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 # Verificacion de extremo a extremo del entorno vps (checklist del capitulo 12 del manual). Sale con 1 si algo falla. No imprime secretos.
-# Variables: VPS_IP, VPS_DOMAIN, VPS_ISSUER (las fija up.sh); DEMO_PASSWORD (opcional) activa login + GET /proyectos (john@uce.edu.ec).
+# Uso autonomo: scripts/vps/smoke.sh <ip> --domain <dominio> --issuer <emisor>   (los mismos argumentos que up.sh)
+# o con variables: VPS_IP, VPS_DOMAIN, VPS_ISSUER (asi lo llama up.sh); DEMO_PASSWORD (opcional) activa login + GET /proyectos (john@uce.edu.ec).
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 source scripts/vps/lib.sh
-: "${VPS_IP:?}" "${VPS_DOMAIN:?}" "${VPS_ISSUER:?}"
+if [ $# -gt 0 ] && [[ "$1" != --* ]]; then VPS_IP=$1; shift; fi
+while [ $# -gt 0 ]; do
+  case "$1" in --domain) VPS_DOMAIN=$2; shift 2;; --issuer) VPS_ISSUER=$2; shift 2;; *) die "opcion desconocida: $1 (uso: $0 <ip> --domain <dominio> --issuer <emisor>)";; esac
+done
+: "${VPS_IP:?falta <ip> (o VPS_IP)}" "${VPS_DOMAIN:?falta --domain (o VPS_DOMAIN)}" "${VPS_ISSUER:?falta --issuer (o VPS_ISSUER)}"
 usar_kubeconfig
 H=propuestas.$VPS_DOMAIN; G=grafana.$VPS_DOMAIN
 fail=0
