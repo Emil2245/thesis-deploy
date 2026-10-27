@@ -14,7 +14,7 @@ k8s/apps/                     Applications de la app por entorno
 k8s/propuestas/{base,overlays/{local,lab,prod,aws}}   manifiestos Kustomize
 infra/hetzner/                OpenTofu: Hetzner + k3s (plan 010)
 infra/aws-floci/              OpenTofu: EKS + RDS + ECR + S3 + Secrets Manager + ALB sobre AWS emulado (plan 035)
-scripts/                      install-tools, prod-up/down, cluster-local-up/down, build-local-images, bootstrap, validate, bump-submodules, seal-jwt, lab/ (tunnel-url), aws-floci/ (up, down, smoke, kubeconfig, add-workers, cluster-prep, copy-images, restore-drill, hpa-test, ca, sync-secrets, screenshots)
+scripts/                      vps/ (up, down, smoke, restore-drill, hpa-test, screenshots, lab-vm), install-tools, prod-up/down, cluster-local-up/down, build-local-images, bootstrap, validate, bump-submodules, seal-jwt, lab/ (tunnel-url), aws-floci/ (up, down, smoke, kubeconfig, add-workers, cluster-prep, copy-images, restore-drill, hpa-test, ca, sync-secrets, screenshots)
 .github/workflows/            validate.yml (PR/push), release.yml (build+push GHCR+bump GitOps)
 docs/                         decisiones.md, runbook.md
 ```
@@ -44,6 +44,11 @@ Sustituto ejecutable de producción: OpenTofu crea EKS, RDS (PostgreSQL 18), ECR
 en un emulador AWS (Floci) que corre en la VM `aws-lab-1` del laboratorio. App en `http://<IP de aws-lab-1>:8080` (ALB emulado; HTTPS 8443 declarado, ver límites en la evidencia v2). Manual de despliegue verificado: `manual-despliegue-floci/` (repo de documentación).
 `scripts/aws-floci/up.sh` · detalles: [clusters/aws-floci/README.md](clusters/aws-floci/README.md), runbook y
 [docs/evidencias/aws-floci-2026-10.md](docs/evidencias/aws-floci-2026-10.md) (v1) y [aws-floci-2026-10-v2.md](docs/evidencias/aws-floci-2026-10-v2.md) (plan 040, sin brechas).
+
+## Despliegue en un VPS genérico (plan 041)
+Una máquina Ubuntu 24.04 con IP pública y SSH (4 vCPU / 8 GB): `scripts/vps/up.sh <ip> --domain <dominio> --issuer <letsencrypt-prod|letsencrypt-staging|selfsigned-ca> [--email <correo>] [--agent <ip2>]`
+instala k3s, Argo CD y toda la plataforma (TLS, PostgreSQL con respaldos a S3, observabilidad, HPA). `scripts/vps/down.sh <ip> --yes` lo desmonta.
+Manual verificado: `manual-despliegue-vps/` (repo de documentación). Detalles: [docs/evidencias/vps-2026-10.md](docs/evidencias/vps-2026-10.md), runbook y decisiones.
 
 ## Releases
 Los submódulos fijan la versión de la app. **Cómo hacer un release:**
