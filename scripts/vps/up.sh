@@ -92,7 +92,7 @@ SKIP_ROOT=1 scripts/bootstrap.sh vps
 
 fase "6 raiz GitOps parametrizada (dominio $DOMAIN, emisor $ISSUER, rama $REVISION)"
 INSTANCES=1; [ -z "$AGENT" ] || INSTANCES=2
-APPS=$(kubectl kustomize k8s/platform/vps | $K create --dry-run=client -f - -o json)
+APPS=$(kubectl kustomize k8s/platform/vps | $K create --dry-run=client -f - -o json | jq -s '{items: [.[] | if .items then .items[] else . end]}')
 ROOT=$($K apply --dry-run=client -f k8s/argocd/root-vps.yaml -o json)
 DEFREPO=https://github.com/emil2245/thesis-deploy
 PATCHES=$(jq -n --argjson apps "$APPS" --arg host "$APP_HOST" --arg ghost "$GRAFANA_HOST" --arg issuer "$ISSUER" --arg email "$EMAIL" \
@@ -107,6 +107,7 @@ PATCHES=$(jq -n --argjson apps "$APPS" --arg host "$APP_HOST" --arg ghost "$GRAF
       {target:{kind:"ConfigMap",name:"propuestas-api-config"},patch:([{op:"replace",path:"/data/CORS_ORIGINS",value:("https://"+$host)}]|tojson)},
       {target:{kind:"Cluster",name:"propuestas-db"},patch:([{op:"replace",path:"/spec/instances",value:$inst}]|tojson)}]}}]
     elif name == "kube-prometheus-stack" then [{op:"add",path:"/spec/sources/0/helm/valuesObject",value:{grafana:{ingress:{annotations:{"cert-manager.io/cluster-issuer":$issuer},hosts:[$ghost],tls:[{secretName:"grafana-tls",hosts:[$ghost]}]}}}}]
+    elif name == "cnpg-operator" and $inst == 1 then [{op:"replace",path:"/spec/source/helm/valuesObject/replicaCount",value:1}]
     elif name == "issuers" and $issuer == "selfsigned-ca" then [{op:"replace",path:"/spec/source/path",value:"k8s/platform/issuers/lab"}]
     elif name == "issuers" then [{op:"add",path:"/spec/source/kustomize",value:{patches:[{target:{kind:"ClusterIssuer",name:"letsencrypt-.*"},patch:([{op:"replace",path:"/spec/acme/email",value:$email}]|tojson)}]}}]
     else [] end;
