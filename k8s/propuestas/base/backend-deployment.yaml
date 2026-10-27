@@ -31,6 +31,23 @@ spec:
           labelSelector:
             matchLabels:
               app.kubernetes.io/name: propuestas-api
+      initContainers:
+        # Espera a que la base acepte conexiones: sin esto la API arranca antes que CloudNativePG, falla en Flyway
+        # ("Connection to propuestas-db-rw:5432 refused") y Kubernetes la reinicia (RESTARTS 2 en el primer despliegue).
+        # Misma imagen (la reescribe kustomize `images`), solo bash y /dev/tcp; sin herramientas nuevas.
+        - name: esperar-db
+          image: ghcr.io/emil2245/propuestas-api
+          command: ["bash", "-c", "until (exec 3<>/dev/tcp/propuestas-db-rw/5432) 2>/dev/null; do echo 'esperando propuestas-db-rw:5432'; sleep 3; done"]
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {memory: 64Mi}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 185
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+            seccompProfile: {type: RuntimeDefault}
       containers:
         - name: api
           image: ghcr.io/emil2245/propuestas-api
