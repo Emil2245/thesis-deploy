@@ -18,7 +18,8 @@ spec:
         deployment:
           replicas: 2
         service:
-          type: NodePort
+          spec:
+            type: NodePort   # con LoadBalancer el servicelb de k3s captura :80 de TODO destino (rompe el relay 169.254.170.23)
         ports:
           web:
             nodePort: 30080
