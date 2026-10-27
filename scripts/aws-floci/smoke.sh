@@ -10,8 +10,8 @@ ok()  { printf 'OK    %s\n' "$*"; }
 bad() { printf 'FALLA %s\n' "$*"; fail=1; }
 chk() { local d=$1; shift; if "$@" >/dev/null 2>&1; then ok "$d"; else bad "$d"; fi; }
 T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
-tofu -chdir=infra/aws-floci output -raw alb_ca_pem > "$T/ca.pem"
-RED=$(tofu -chdir=infra/aws-floci output -raw alb_redirect_http)
+tofu_out alb_ca_pem > "$T/ca.pem"
+RED=$(tofu_out alb_redirect_http)
 if [ "$RED" = true ]; then
   B=https://$FLOCI_IP:8443; C="curl -sS --cacert $T/ca.pem -m 30"
   r=$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' -m 20 "http://$FLOCI_IP:8080/")

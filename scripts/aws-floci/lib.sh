@@ -34,6 +34,13 @@ awsf() { aws --endpoint-url "$FLOCI" "$@"; }
 LAB_KEY="${LAB_KEY:-$HOME/.ssh/tesis-lab}"
 SSHOPTS=(-i "$LAB_KEY" -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new)
 SSH="ssh ${SSHOPTS[*]} ubuntu@$FLOCI_IP"
+# tofu_out <nombre> [raw]: lee un output del estado local (infra/aws-floci/terraform.tfstate) con jq, sin tofu: no exige
+# proveedores instalados (evita descargar ~300 MB solo para leer un valor).
+tofu_out() {
+  local f=infra/aws-floci/terraform.tfstate
+  [ -r "$f" ] || die "no existe $f (ejecute antes el capitulo 4: tofu apply, o up.sh)"
+  jq -er --arg n "$1" '.outputs[$n].value | tostring' "$f" || die "el estado no tiene el output '$1'"
+}
 # tofu_init: init con caches en $HOME; si un intento anterior dejo un proveedor a medias, lo limpia y repite una vez.
 tofu_init() {
   local d=infra/aws-floci
