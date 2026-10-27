@@ -7,3 +7,4 @@ kubeconfig*
 !*.tfvars.example
 tests/load/results/
 !scripts/aws-floci/kubeconfig.sh
+hpa-resultados/
