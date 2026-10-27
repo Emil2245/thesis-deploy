@@ -29,6 +29,9 @@ for d in k8s/platform/aws-floci/fluent-bit k8s/platform/aws-floci/pod-identity-r
 done
 if command -v tofu >/dev/null; then
   echo "== infra/aws-floci (tofu fmt + validate)"
+  # caches bajo $HOME (no /tmp: en algunos equipos es un tmpfs pequeno y el proveedor de AWS, ~300 MB, no cabe)
+  C="${XDG_CACHE_HOME:-$HOME/.cache}/propuestas-floci"; mkdir -p "$C/tmp" "$C/tfdata" "$C/tf-plugins"
+  export TMPDIR="$C/tmp" TF_DATA_DIR="$C/tfdata" TF_PLUGIN_CACHE_DIR="$C/tf-plugins"
   tofu -chdir=infra/aws-floci fmt -check
   tofu -chdir=infra/aws-floci init -backend=false -input=false >/dev/null
   tofu -chdir=infra/aws-floci validate
