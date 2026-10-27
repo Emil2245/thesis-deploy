@@ -25,10 +25,6 @@ resource "aws_lb" "main" {
 
 # Un solo target group: el NodePort de Traefik (G5) en TODOS los nodos. Los nodos adicionales (add-workers.sh) tienen IP fija
 # 172.18.0.20x en la red docker de Floci.
-locals {
-  node_ips = concat(data.aws_instances.nodes.private_ips, [for i in range(1, var.node_count) : "172.18.0.${200 + i}"])
-}
-
 resource "aws_lb_target_group" "ingress" {
   name        = "propuestas-ingress"
   protocol    = "HTTP"
@@ -43,9 +39,9 @@ resource "aws_lb_target_group" "ingress" {
 }
 
 resource "aws_lb_target_group_attachment" "ingress" {
-  for_each          = toset(local.node_ips)
+  count             = var.node_count
   target_group_arn  = aws_lb_target_group.ingress.arn
-  target_id         = each.value
+  target_id         = count.index == 0 ? data.aws_instances.nodes.private_ips[0] : "172.18.0.${200 + count.index}"
   availability_zone = "all"
   port              = var.nodeport_ingress
 }
