@@ -6,6 +6,7 @@
 # para recuperar los Secrets si ESO no estuviera disponible; no crea ninguna clave de acceso.
 set -euo pipefail
 source "$(dirname "$0")/lib.sh"
+usar_kubeconfig
 NS=propuestas
 kubectl create namespace "$NS" --dry-run=client -o yaml | kubectl apply -f - >/dev/null
 kubectl label namespace "$NS" pod-security.kubernetes.io/enforce=restricted --overwrite >/dev/null

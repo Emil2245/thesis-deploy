@@ -4,7 +4,7 @@
 #  2. CA de Floci (pública, no es un secreto) en un ConfigMap "floci-ca" por namespace que habla con Floci.
 set -euo pipefail
 source "$(dirname "$0")/lib.sh"
-SSH="ssh -i ${LAB_KEY:-$HOME/.ssh/tesis-lab} -o BatchMode=yes ubuntu@$FLOCI_IP"
+usar_kubeconfig
 FIP=$($SSH "docker inspect -f '{{.NetworkSettings.Networks.floci_default.IPAddress}}' floci")
 [ -n "$FIP" ] || { echo "no se pudo obtener la IP de Floci" >&2; exit 1; }
 cur=$(kubectl -n kube-system get cm coredns-custom -o jsonpath='{.data.floci\.server}' 2>/dev/null | grep -o '[0-9.]* floci' || true)

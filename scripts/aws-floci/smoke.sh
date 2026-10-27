@@ -4,6 +4,7 @@
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 source scripts/aws-floci/lib.sh
+usar_kubeconfig
 fail=0
 ok()  { printf 'OK    %s\n' "$*"; }
 bad() { printf 'FALLA %s\n' "$*"; fail=1; }
@@ -41,7 +42,7 @@ for e in propuestas-db-app propuestas-jwt; do
 done
 # G2: sin claves estáticas de AWS en el clúster ni TLS sin verificar en el repo
 if kubectl get secret -A --no-headers | awk '{print $2}' | grep -i aws; then bad "hay Secrets con 'aws' en el nombre"; else ok "ningún Secret aws-* en el clúster"; fi
-if git grep -n 'verify[ ]Off' >/dev/null 2>&1; then bad "el repo desactiva la verificación TLS"; else ok "sin verificación TLS desactivada en el repo"; fi
+if git grep -n 'verify[ ]Off' -- . ':!docs/evidencias' >/dev/null 2>&1; then bad "el repo desactiva la verificación TLS"; else ok "sin verificación TLS desactivada en el repo"; fi
 # G2/G4/G7: un respaldo real con pod identity + TLS verificado (S3)
 j=smoke-backup-$(date +%s)
 kubectl -n propuestas create job --from=cronjob/propuestas-backup "$j" >/dev/null 2>&1

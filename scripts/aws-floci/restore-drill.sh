@@ -4,14 +4,12 @@
 # La contraseña viaja por stdin (nunca en argumentos ni en pantalla). Corre postgres:18.6-alpine en la VM aws-lab-1.
 set -euo pipefail
 source "$(dirname "$0")/lib.sh"
-KEY=${LAB_KEY:-$HOME/.ssh/tesis-lab}
-SSH="ssh -i $KEY -o BatchMode=yes ubuntu@$FLOCI_IP"
 TABLAS="rubro apu apu_detalle insumo actividad"
 f=$(awsf s3 ls s3://propuestas-backups/db/ | awk '{print $4}' | sort | tail -1)
 [ -n "$f" ] || { echo "no hay respaldos en s3://propuestas-backups/db/" >&2; exit 1; }
 D=$(mktemp -d); trap 'rm -rf "$D"' EXIT
 awsf s3 cp "s3://propuestas-backups/db/$f" "$D/b.dump" --quiet
-scp -q -i "$KEY" "$D/b.dump" "ubuntu@$FLOCI_IP:/tmp/b.dump"
+scp -q "${SSHOPTS[@]}" "$D/b.dump" "ubuntu@$FLOCI_IP:/tmp/b.dump"
 REMOTE=$(cat <<'EOS'
 read -r PGPASSWORD; export PGPASSWORD
 TABLAS="$1"
