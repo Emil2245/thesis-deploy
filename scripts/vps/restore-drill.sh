@@ -5,7 +5,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 source scripts/vps/lib.sh
-export KUBECONFIG="$VPS_KUBECONFIG"
+usar_kubeconfig
 J=restore-drill-$(date +%s)
 kubectl -n propuestas apply -f - >/dev/null <<EOF
 apiVersion: batch/v1

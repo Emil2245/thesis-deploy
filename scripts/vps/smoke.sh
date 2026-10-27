@@ -5,7 +5,7 @@ set -uo pipefail
 cd "$(dirname "$0")/../.."
 source scripts/vps/lib.sh
 : "${VPS_IP:?}" "${VPS_DOMAIN:?}" "${VPS_ISSUER:?}"
-export KUBECONFIG="$VPS_KUBECONFIG"
+usar_kubeconfig
 H=propuestas.$VPS_DOMAIN; G=grafana.$VPS_DOMAIN
 fail=0
 ok()  { printf 'OK    %s\n' "$*"; }
