@@ -1,7 +1,7 @@
 # Overlay "aws": EKS emulado por Floci (infra/aws-floci). Sin CNPG: la base de datos es RDS (PostgreSQL 18).
-# Sin Ingress/Traefik: el ALB reenvía a NodePorts del nodo (30080 web, 30081 api; ver infra/aws-floci/alb.tf).
-# Los Secrets (propuestas-db-app, propuestas-jwt, aws-workload-credentials) los crea
-# scripts/aws-floci/sync-secrets.sh desde Secrets Manager; nunca viven en git.
+# Tráfico: ALB (HTTPS 8443) -> NodePort 30080 de Traefik en todos los nodos -> Ingress "propuestas" (web + /api).
+# Los Secrets (propuestas-db-app, propuestas-jwt) los crea External Secrets Operator desde Secrets Manager
+# (k8s/platform/aws-floci/eso-config); nunca viven en git. Las cargas usan pod identity (sin claves estáticas).
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
@@ -19,13 +19,13 @@ configMapGenerator:
   - name: propuestas-api-config
     behavior: merge
     literals:
-      # origen del ALB (IP de la VM aws-lab-1 + puerto del listener)
-      - CORS_ORIGINS=http://192.168.1.12:8080
-      # no hay Alloy/OTLP en este entorno
-      - OTEL_SDK_DISABLED=true
+      # origen del ALB (IP de la VM aws-lab-1 + puerto HTTPS del listener; scripts/aws-floci/up.sh lo valida)
+      - CORS_ORIGINS=https://192.168.1.12:8443
+      # trazas directo a Tempo (k8s/platform/tempo); métricas por ServiceMonitor (kube-prometheus-stack)
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo.monitoring.svc:4317
       - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=aws-floci
 patches:
-  # CRDs de CNPG y Prometheus Operator no existen en este clúster
+  # el CRD de CNPG no existe en este clúster (la base es RDS)
   - target: {kind: Cluster, name: propuestas-db}
     patch: |-
       $patch: delete
@@ -33,20 +33,6 @@ patches:
       kind: Cluster
       metadata:
         name: propuestas-db
-  - target: {kind: ServiceMonitor, name: propuestas-api}
-    patch: |-
-      $patch: delete
-      apiVersion: monitoring.coreos.com/v1
-      kind: ServiceMonitor
-      metadata:
-        name: propuestas-api
-  - target: {kind: Ingress, name: propuestas}
-    patch: |-
-      $patch: delete
-      apiVersion: networking.k8s.io/v1
-      kind: Ingress
-      metadata:
-        name: propuestas
   - target: {kind: NetworkPolicy, name: allow-db-access}
     patch: |-
       $patch: delete
@@ -54,35 +40,23 @@ patches:
       kind: NetworkPolicy
       metadata:
         name: allow-db-access
-  # el tráfico del ALB llega por NodePort desde la red docker del emulador
+  # Traefik vive en su propio namespace
   - target: {kind: NetworkPolicy, name: allow-traefik-to-apps}
     patch: |-
       - op: replace
-        path: /spec/ingress/0/from
-        value:
-          - ipBlock: {cidr: 0.0.0.0/0}
-  - target: {kind: Service, name: propuestas-api}
+        path: /spec/ingress/0/from/0/namespaceSelector/matchLabels
+        value: {kubernetes.io/metadata.name: traefik}
+  # el Ingress de la base trae un host de ejemplo; aquí atiende cualquier host (el ALB se accede por IP)
+  - target: {kind: Ingress, name: propuestas}
     patch: |-
-      - op: add
-        path: /spec/type
-        value: NodePort
-      - op: add
-        path: /spec/ports/0/nodePort
-        value: 30081
-  - target: {kind: Service, name: propuestas-web}
-    patch: |-
-      - op: add
-        path: /spec/type
-        value: NodePort
-      - op: add
-        path: /spec/ports/0/nodePort
-        value: 30080
-  # base de datos = RDS (proxy de Floci en la red docker floci_default)
+      - op: remove
+        path: /spec/rules/0/host
+  # base de datos = RDS (proxy de Floci; "floci" resuelve por CoreDNS, ver scripts/aws-floci/cluster-prep.sh)
   - target: {kind: Deployment, name: propuestas-api}
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/env/0/value
-        value: jdbc:postgresql://172.18.0.2:7001/propuestas
+        value: jdbc:postgresql://floci:7001/propuestas
       - op: add
         path: /spec/template/spec/containers/0/imagePullPolicy
         value: IfNotPresent

@@ -34,12 +34,25 @@ variable "alb_port" {
   description = "Puerto del listener HTTP del ALB (publicado por el compose de Floci)."
 }
 
-variable "nodeport_web" {
-  type    = number
-  default = 30080
+variable "nodeport_ingress" {
+  type        = number
+  default     = 30080
+  description = "NodePort del Service de Traefik (k8s/platform/aws-floci/traefik)."
 }
 
-variable "nodeport_api" {
-  type    = number
-  default = 30081
+variable "alb_https_port" {
+  type        = number
+  default     = 8443
+  description = "Puerto del listener HTTPS del ALB (publicado por el compose de Floci)."
+}
+
+variable "node_instance_type" {
+  type    = string
+  default = "m5.large"
+}
+
+variable "node_count" {
+  type        = number
+  default     = 2
+  description = "Nodos de trabajo del grupo (G1). Floci solo materializa un nodo k3s por clúster; ver docs/evidencias/aws-floci-2026-10-v2.md."
 }

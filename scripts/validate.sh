@@ -21,8 +21,8 @@ for d in issuers dashboards tunnel; do
     -schema-location default \
     -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
 done
-echo "== aws-floci: fluent-bit y apps"
-for d in k8s/platform/aws-floci/fluent-bit k8s/apps/propuestas-aws; do
+echo "== aws-floci: plataforma y apps"
+for d in k8s/platform/aws-floci/fluent-bit k8s/platform/aws-floci/pod-identity-relay k8s/platform/aws-floci/eso-config k8s/platform/aws-floci k8s/apps/propuestas-aws; do
   kubectl kustomize "$d" | kubeconform -strict -summary -ignore-missing-schemas \
     -schema-location default \
     -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'

@@ -8,7 +8,8 @@ services:
     ports:
       - "4566:4566"            # APIs AWS + ECR (docker push/pull) + listeners ALB
       - "7001-7099:7001-7099"  # proxy RDS (PostgreSQL)
-      - "8080-8089:8080-8089"  # listeners ALB (HTTP)
+      - "8080-8089:8080-8089"  # listeners ALB (HTTP, redirección)
+      - "8443-8449:8443-8449"  # listeners ALB (HTTPS)
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /opt/floci/data:/app/data

@@ -1,0 +1,12 @@
+# aws-floci (plan 040): Prometheus + operador + kube-state-metrics + node-exporter; sin Grafana ni Alertmanager (RAM del nodo emulado).
+alertmanager:
+  enabled: false
+grafana:
+  enabled: false
+  forceDeployDatasource: false
+  defaultDashboardsEnabled: false
+prometheus:
+  prometheusSpec:
+    retention: 1d
+    resources:
+      requests: {cpu: 100m, memory: 384Mi}
