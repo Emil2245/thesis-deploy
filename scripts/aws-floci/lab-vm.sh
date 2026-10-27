@@ -29,7 +29,7 @@ if (-not (Test-Path C:\\lab\\images\\noble-base.vhdx)) { "FALTA la imagen base C
 if (Get-VM -Name '$NAME' -EA SilentlyContinue) { "YA EXISTE la VM $NAME: ejecute primero 'lab-vm.sh destroy'"; exit 1 }
 "ok"
 P
-    [ "$(ps "$T/p.ps1" | tail -1)" = ok ] || { ps "$T/p.ps1" >&2; exit 1; }
+    [ "$(ps "$T/p.ps1" | tr -d "\r" | tail -1)" = ok ] || { ps "$T/p.ps1" >&2; exit 1; }
     scripts/lab/render-seeds.sh floci "$NAME" >/dev/null 2>&1 || { echo "ERROR: render-seeds.sh fallo (se necesita podman o docker y la clave publica)" >&2; exit 1; }
     scp -q -i "$KEY" -o BatchMode=yes -o StrictHostKeyChecking=accept-new "$WORK/seed-$NAME.iso" "$HOST:C:/lab/seeds/seed-$NAME.iso"
     { echo "\$Name='$NAME'; \$Cpu=4; \$MemGB=12"; grep -v '^param' scripts/lab/new-vm.ps1; } > "$T/c.ps1"
