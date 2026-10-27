@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Instala kubectl, helm, k3d, kubeconform, tofu, tflint y kubeseal en ~/.local/bin (sin sudo).
+# Instala kubectl, helm, k3d, kubeconform, tofu, tflint, kubeseal, jq y k6 en ~/.local/bin (sin sudo, Linux amd64).
+# curl, openssl, git y ssh vienen del sistema operativo: el script solo los comprueba (no instala paquetes).
 set -euo pipefail
 KUBECTL_VERSION=v1.37.1
 HELM_VERSION=v4.3.1
@@ -8,7 +9,12 @@ KUBECONFORM_VERSION=v0.8.0
 TOFU_VERSION=1.13.2
 TFLINT_VERSION=v0.65.0
 KUBESEAL_VERSION=0.41.1
+JQ_VERSION=1.8.2
+K6_VERSION=v2.3.0
 BIN="${HOME}/.local/bin"; mkdir -p "$BIN"
+for c in curl openssl git ssh; do
+  command -v "$c" >/dev/null || { echo "Falta '$c': instalelo con el gestor de paquetes del sistema (p. ej. sudo apt install curl openssl git openssh-client)" >&2; exit 1; }
+done
 T="$(mktemp -d)"; trap 'rm -rf "$T"' EXIT
 cd "$T"
 
@@ -54,6 +60,20 @@ curl -fsSL "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${
 grep " kubeseal-${KUBESEAL_VERSION}-linux-amd64.tar.gz\$" ks.sums | sha256sum -c -
 tar xzf "kubeseal-${KUBESEAL_VERSION}-linux-amd64.tar.gz" kubeseal; install -m 0755 kubeseal "$BIN/kubeseal"
 
+# jq (sha256sum.txt publicado)
+curl -fsSLO "https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-amd64"
+curl -fsSL "https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/sha256sum.txt" -o jq.sums
+grep ' jq-linux-amd64$' jq.sums | sha256sum -c -
+install -m 0755 jq-linux-amd64 "$BIN/jq"
+
+# k6 (checksums publicados)
+curl -fsSLO "https://github.com/grafana/k6/releases/download/${K6_VERSION}/k6-${K6_VERSION}-linux-amd64.tar.gz"
+curl -fsSL "https://github.com/grafana/k6/releases/download/${K6_VERSION}/k6-${K6_VERSION}-checksums.txt" -o k6.sums
+grep " k6-${K6_VERSION}-linux-amd64.tar.gz\$" k6.sums | sha256sum -c -
+tar xzf "k6-${K6_VERSION}-linux-amd64.tar.gz"; install -m 0755 "k6-${K6_VERSION}-linux-amd64/k6" "$BIN/k6"
+
 echo "Instalado en $BIN:"; for t in kubectl helm k3d kubeconform tofu; do "$BIN/$t" version 2>&1 | head -1 || true; done
 "$BIN/tflint" --version | head -1
 "$BIN/kubeseal" --version | head -1
+"$BIN/jq" --version
+"$BIN/k6" version | head -1
