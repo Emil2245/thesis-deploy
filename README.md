@@ -14,7 +14,7 @@ k8s/apps/                     Applications de la app por entorno
 k8s/propuestas/{base,overlays/{local,lab,prod,aws}}   manifiestos Kustomize
 infra/hetzner/                OpenTofu: Hetzner + k3s (plan 010)
 infra/aws-floci/              OpenTofu: EKS + RDS + ECR + S3 + Secrets Manager + ALB sobre AWS emulado (plan 035)
-scripts/                      vps/ (up, down, smoke, restore-drill, hpa-test, screenshots, lab-vm), install-tools, prod-up/down, cluster-local-up/down, build-local-images, bootstrap, validate, bump-submodules, seal-jwt, lab/ (tunnel-url), aws-floci/ (up, down, smoke, kubeconfig, add-workers, cluster-prep, copy-images, restore-drill, hpa-test, ca, sync-secrets, screenshots)
+scripts/                      vps/ (up, down, smoke, restore-drill, hpa-test, screenshots, lab-vm), install-tools, prod-up/down, cluster-local-up/down, build-local-images, bootstrap, validate, bump-submodules, seal-jwt, lab/ (tunnel-url), aws-floci/ (up, down, root, lab-vm, smoke, kubeconfig, add-workers, cluster-prep, copy-images, restore-drill, hpa-test, ca, sync-secrets, screenshots)
 .github/workflows/            validate.yml (PR/push), release.yml (build+push GHCR+bump GitOps)
 docs/                         decisiones.md, runbook.md
 ```

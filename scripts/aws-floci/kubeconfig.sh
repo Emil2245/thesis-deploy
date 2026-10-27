@@ -4,11 +4,23 @@
 set -euo pipefail
 source "$(dirname "$0")/lib.sh"
 CL=${1:-propuestas}
+export KUBECONFIG="$AWS_KUBECONFIG"   # este script CREA el archivo: nunca toma el KUBECONFIG del entorno
+T=(env AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test)
+# Una clave guardada de una VM anterior ya no existe en el Floci actual: se comprueba contra IAM y, si no esta, se recrea.
+if [ -r "$CRED" ] && grep -q AKIA "$CRED"; then
+  kid=$(sed -n 's/^AWS_ACCESS_KEY_ID=//p' "$CRED")
+  vivas=$("${T[@]}" aws --endpoint-url "$FLOCI" iam list-access-keys --user-name propuestas-operator --query 'AccessKeyMetadata[].AccessKeyId' --output text 2>/dev/null || true)
+  case " $(echo $vivas) " in *" $kid "*) ;; *) echo "las credenciales guardadas en $CRED no existen en este Floci (VM recreada); se crean de nuevo"; rm -f "$CRED"; export AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test;; esac
+fi
 # Floci rechaza test/test en la autenticación EKS (otorgaría cluster-admin): crear un usuario IAM operador con clave propia.
 if [ ! -r "$CRED" ] || ! grep -q AKIA "$CRED"; then
   mkdir -p "$(dirname "$CRED")"; chmod 700 "$(dirname "$CRED")"
-  AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test aws --endpoint-url "$FLOCI" iam create-user --user-name propuestas-operator >/dev/null 2>&1 || true
-  k=$(AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test aws --endpoint-url "$FLOCI" iam create-access-key --user-name propuestas-operator --query 'AccessKey.[AccessKeyId,SecretAccessKey]' --output text)
+  "${T[@]}" aws --endpoint-url "$FLOCI" iam create-user --user-name propuestas-operator >/dev/null 2>&1 || true
+  # una clave anterior del usuario se borra: IAM admite solo dos por usuario
+  for old in $("${T[@]}" aws --endpoint-url "$FLOCI" iam list-access-keys --user-name propuestas-operator --query 'AccessKeyMetadata[].AccessKeyId' --output text 2>/dev/null); do
+    "${T[@]}" aws --endpoint-url "$FLOCI" iam delete-access-key --user-name propuestas-operator --access-key-id "$old" >/dev/null 2>&1 || true
+  done
+  k=$("${T[@]}" aws --endpoint-url "$FLOCI" iam create-access-key --user-name propuestas-operator --query 'AccessKey.[AccessKeyId,SecretAccessKey]' --output text)
   umask 077; printf 'AWS_ACCESS_KEY_ID=%s\nAWS_SECRET_ACCESS_KEY=%s\n' $k > "$CRED"
   source "$(dirname "$0")/lib.sh"
 fi

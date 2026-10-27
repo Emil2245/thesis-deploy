@@ -7,7 +7,7 @@
 set -euo pipefail
 source "$(dirname "$0")/lib.sh"
 TOTAL=${1:-2}
-SSH="ssh -i ${LAB_KEY:-$HOME/.ssh/tesis-lab} -o BatchMode=yes ubuntu@$FLOCI_IP"
+usar_kubeconfig
 CL=${CLUSTER:-propuestas}
 # el token del clúster viaja solo dentro de la VM (nunca a pantalla ni a disco local)
 $SSH "bash -s" "$CL" "$TOTAL" <<'REMOTE'

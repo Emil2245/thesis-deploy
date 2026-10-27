@@ -4,7 +4,7 @@
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
 const { chromium } = createRequire(import.meta.url)(process.env.PW_MODULE || 'playwright');
-const ip = process.argv[2] || '192.168.1.13';
+const ip = process.argv[2] || process.env.FLOCI_IP;
 const out = process.env.OUT || 'docs/evidencias/aws-floci'; fs.mkdirSync(out, { recursive: true });
 const pages = [
   ['01-consola-inicio', `http://${ip}:4500/console/aws`],
