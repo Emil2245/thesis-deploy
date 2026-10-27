@@ -20,7 +20,7 @@ configMapGenerator:
     behavior: merge
     literals:
       # origen del ALB (IP de la VM aws-lab-1 + puerto HTTPS del listener; scripts/aws-floci/up.sh lo valida)
-      - CORS_ORIGINS=http://192.168.1.12:8080,https://192.168.1.12:8443
+      - CORS_ORIGINS=http://192.168.1.13:8080,https://192.168.1.13:8443
       # trazas directo a Tempo (k8s/platform/tempo); métricas por ServiceMonitor (kube-prometheus-stack)
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo.monitoring.svc:4317
       - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=aws-floci

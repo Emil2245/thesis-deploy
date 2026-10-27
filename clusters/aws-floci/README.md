@@ -5,7 +5,7 @@ un emulador de AWS (puerto 4566) que levanta EKS (k3s real), RDS (PostgreSQL rea
 
 | VM | Rol | vCPU / RAM | IP (DHCP) |
 |----|-----|-----------|-----------|
-| aws-lab-1 | Docker + Floci | 4 / 12 GB | 192.168.1.12 |
+| aws-lab-1 | Docker + Floci | 4 / 12 GB | 192.168.1.13 |
 
 **Recomendado:** reserva DHCP en el router para esa IP (el endpoint de Floci, el kubeconfig y el CORS del overlay `aws` la usan).
 
