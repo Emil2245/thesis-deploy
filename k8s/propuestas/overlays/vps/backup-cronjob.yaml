@@ -52,7 +52,7 @@ spec:
               args:
                 - |
                   aws --endpoint-url "$S3_ENDPOINT" s3api head-bucket --bucket "$S3_BUCKET" 2>/dev/null || aws --endpoint-url "$S3_ENDPOINT" s3 mb "s3://$S3_BUCKET"
-                  aws --endpoint-url "$S3_ENDPOINT" s3 cp /backup/ "s3://$S3_BUCKET/db/" --recursive
+                  aws --endpoint-url "$S3_ENDPOINT" s3 cp --no-progress /backup/ "s3://$S3_BUCKET/db/" --recursive
               env:
                 - {name: AWS_DEFAULT_REGION, value: us-east-1}
                 - {name: HOME, value: /tmp}
