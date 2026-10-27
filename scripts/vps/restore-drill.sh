@@ -51,6 +51,7 @@ spec:
               Q() { psql -h /tmp -U postgres -d restore_drill -tAc "\$1"; }
               createdb -h /tmp -U postgres restore_drill
               pg_restore -h /tmp -U postgres -d restore_drill --no-owner /work/b.dump
+              for i in \$(seq 1 20); do pg_isready -q -h propuestas-db-rw && break; sleep 3; done
               fail=0
               printf '%-14s %10s %10s\n' tabla restaurada en_vivo
               for t in rubro apu apu_detalle insumo actividad; do

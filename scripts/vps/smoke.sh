@@ -35,8 +35,8 @@ done
 pod=$(kubectl -n propuestas get pods -l app.kubernetes.io/name=propuestas-api -o jsonpath='{.items[0].metadata.name}')
 h=$(kubectl get --raw "/api/v1/namespaces/propuestas/pods/$pod:9000/proxy/q/health" 2>/dev/null | jq -r .status)
 [ "$h" = UP ] && ok "/q/health (puerto de gestion) = UP" || bad "/q/health = $h"
-v=$(kubectl -n propuestas logs "$pod" --tail=2000 2>/dev/null | grep -o 'Migrating schema.*to version "[0-9]*' | tail -1 | grep -o '[0-9]*$')
-[ -n "$v" ] && ok "Flyway: migraciones aplicadas (ultima registrada en el log: V$v)" || ok "Flyway: sin linea de migracion en el log reciente (la base ya estaba migrada)"
+v=$(kubectl -n propuestas exec propuestas-db-1 -c postgres -- psql -U postgres -d propuestas -tAc "select max(version::int) from flyway_schema_history where success" 2>/dev/null | tr -d '[:space:]')
+[ "${v:-0}" -ge 22 ] 2>/dev/null && ok "Flyway: esquema migrado hasta V$v" || bad "Flyway: version $v (se esperaba >= 22)"
 if [ -n "${DEMO_PASSWORD:-}" ]; then
   tok=$("${C[@]}" -H 'Content-Type: application/json' -d "{\"email\":\"john@uce.edu.ec\",\"password\":\"$DEMO_PASSWORD\"}" "https://$H/api/v1/auth/login" | jq -r '.accessToken // .token // empty')
   if [ -n "$tok" ]; then
