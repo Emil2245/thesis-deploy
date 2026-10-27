@@ -1,0 +1,3 @@
+# KSV-0009: el relay de Pod Identity (k8s/platform/aws-floci/pod-identity-relay) DEBE usar hostNetwork: publica 169.254.170.23 en el
+# nodo para que los pods lo alcancen, igual que el agente real de EKS Pod Identity. Solo corre en el entorno aws-floci (emulado).
+KSV-0009

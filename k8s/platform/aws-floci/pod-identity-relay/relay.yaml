@@ -30,6 +30,8 @@ spec:
       tolerations:
         - {operator: Exists}
       priorityClassName: system-node-critical
+      securityContext:
+        seccompProfile: {type: RuntimeDefault}
       containers:
         - name: relay
           image: alpine/socat:1.8.1.3
