@@ -15,7 +15,9 @@ BIN="${HOME}/.local/bin"; mkdir -p "$BIN"
 for c in curl openssl git ssh; do
   command -v "$c" >/dev/null || { echo "Falta '$c': instalelo con el gestor de paquetes del sistema (p. ej. sudo apt install curl openssl git openssh-client)" >&2; exit 1; }
 done
-T="$(mktemp -d)"; trap 'rm -rf "$T"' EXIT
+# Descarga y extrae bajo $HOME (no en /tmp: en algunos equipos es un tmpfs pequeno y tar falla con "Wrote only ...")
+W="${XDG_CACHE_HOME:-$HOME/.cache}/propuestas-tools"; mkdir -p "$W"
+T="$(mktemp -d -p "$W")"; trap 'rm -rf "$T"' EXIT
 cd "$T"
 
 # kubectl (checksum publicado)
@@ -72,8 +74,16 @@ curl -fsSL "https://github.com/grafana/k6/releases/download/${K6_VERSION}/k6-${K
 grep " k6-${K6_VERSION}-linux-amd64.tar.gz\$" k6.sums | sha256sum -c -
 tar xzf "k6-${K6_VERSION}-linux-amd64.tar.gz"; install -m 0755 "k6-${K6_VERSION}-linux-amd64/k6" "$BIN/k6"
 
-echo "Instalado en $BIN:"; for t in kubectl helm k3d kubeconform tofu; do "$BIN/$t" version 2>&1 | head -1 || true; done
-"$BIN/tflint" --version | head -1
-"$BIN/kubeseal" --version | head -1
-"$BIN/jq" --version
-"$BIN/k6" version | head -1
+echo "Instalado en $BIN:"
+# Falla en voz alta si alguna herramienta no quedo en la version esperada
+check() { local n=$1 want=$2; shift 2; local got; got="$("$@" 2>&1 | head -3)"
+  case "$got" in *"$want"*) echo "OK $n $want";; *) echo "ERROR: $n no esta en la version esperada ($want): $got" >&2; exit 1;; esac; }
+check kubectl "$KUBECTL_VERSION" "$BIN/kubectl" version --client
+check helm "$HELM_VERSION" "$BIN/helm" version
+check k3d "$K3D_VERSION" "$BIN/k3d" version
+check kubeconform "${KUBECONFORM_VERSION#v}" "$BIN/kubeconform" -v
+check tofu "$TOFU_VERSION" "$BIN/tofu" version
+check tflint "${TFLINT_VERSION#v}" "$BIN/tflint" --version
+check kubeseal "$KUBESEAL_VERSION" "$BIN/kubeseal" --version
+check jq "$JQ_VERSION" "$BIN/jq" --version
+check k6 "${K6_VERSION#v}" "$BIN/k6" version
