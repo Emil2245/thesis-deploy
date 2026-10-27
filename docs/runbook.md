@@ -60,11 +60,14 @@ URL actual: `scripts/lab/tunnel-url.sh`. Cambia al reiniciar: `kubectl -n tunnel
 Desactivar: quitar `../tunnel` de `k8s/platform/lab/kustomization.yaml`.
 Seguridad: la app es pública mientras el túnel corre; los usuarios demo del seed V004 tienen contraseñas conocidas, cambiarlas antes de compartir la URL.
 
-## Entorno `aws-floci` (AWS emulado, plan 035)
+## Entorno `aws-floci` (AWS emulado, planes 035 y 040)
 VM `aws-lab-1` (4 vCPU / 12 GB, IP DHCP; reservarla en el router) con Docker + Floci 2.3.0 (`clusters/aws-floci/compose.yaml`); estado persistente en `/opt/floci/data`.
-- **Crear la VM:** `WORK=<dir> scripts/lab/render-seeds.sh floci aws-lab-1`, copiar el ISO a `C:\lab\seeds\seed-aws-lab-1.iso` (scp con la misma clave que `winps.sh`) y `scripts/lab/winps.sh` con `new-vm.ps1 -Name aws-lab-1 -Cpu 4 -MemGB 12`. IP: escaneo de la LAN (Hyper-V no la reporta). Salud: `curl http://<ip>:4566/_floci/health`.
-- **Up:** `FLOCI_IP=<ip> scripts/aws-floci/up.sh` (tofu apply, kubeconfig `~/.kube/propuestas-aws.yaml`, copia de imágenes a ECR, secretos, Argo CD + app-of-apps). Requiere `aws` CLI (v1 sirve), `tofu`, `kubectl`, `helm`, `jq`.
-- **Down:** `tofu -chdir=infra/aws-floci destroy` y, si se quiere borrar todo, parar la VM desde Hyper-V (solo `aws-lab-1`). **Reset:** `docker compose -f /opt/floci/compose.yaml down -v` y `rm -rf /opt/floci/data` en la VM, luego `up.sh`.
-- **Reiniciar Floci** (`docker compose up -d` tras cambiar el compose) recrea el contenedor k3s del EKS; el estado del clúster persiste, pero no hacerlo durante una prueba de carga. Con `FLOCI_HOSTNAME=floci` el endpoint de RDS pasa a `floci:7001` (dentro de pods se usa la IP del contenedor `172.18.0.2`).
-- **Operación:** respaldos `kubectl -n propuestas create job --from=cronjob/propuestas-backup <nombre>`; restauración de prueba `scripts/aws-floci/restore-test.sh`; HPA `DEMO_PASSWORD=... scripts/aws-floci/hpa-test.sh`; capturas `scripts/aws-floci/screenshots.mjs`. Consola web de Floci: `http://<ip>:4500`.
-
+Manual completo y verificado: `manual-despliegue-floci/` en el repositorio de documentación de la tesis (PDF).
+- **Crear la VM:** `WORK=<dir> scripts/lab/render-seeds.sh floci aws-lab-1`, copiar el ISO a `C:\lab\seeds\seed-aws-lab-1.iso` (scp con la misma clave que `winps.sh`) y `scripts/lab/winps.sh` con `new-vm.ps1 -Name aws-lab-1 -Cpu 4 -MemGB 12`. IP: escaneo de la LAN (Hyper-V no la reporta); si cambia, editar `CORS_ORIGINS` del overlay `aws` y subirlo a la rama que sigue Argo. Salud: `curl http://<ip>:4566/_floci/health`.
+- **Up (un comando):** `FLOCI_IP=<ip> [DEMO_PASSWORD=...] scripts/aws-floci/up.sh` encadena Floci -> `tofu apply` -> kubeconfig -> nodos de trabajo -> imágenes a ECR -> CoreDNS+CA -> Argo CD -> espera -> `smoke.sh`. Idempotente. Requiere `aws` CLI v2, `tofu`, `kubectl`, `helm`, `jq`, `skopeo`.
+- **Down:** `scripts/aws-floci/down.sh` (borra agentes y `tofu destroy`); `--reset` borra además el estado de Floci.
+- **Cargas sin claves estáticas:** Pod Identity (roles `propuestas-workload|logs|eso`) con un relay propio (`k8s/platform/aws-floci/pod-identity-relay`) porque el de Floci no arranca; secretos por External Secrets Operator (`sync-secrets.sh` solo como break-glass); TLS verificado hacia Floci (nombre `floci` por CoreDNS + CA en ConfigMap `floci-ca`, ver `cluster-prep.sh`).
+- **Nodos:** el node group es metadato (Floci: un k3s por clúster); `add-workers.sh` une agentes k3s reales (IP fija 172.18.0.20x, destinos del ALB).
+- **Reiniciar Floci** (`docker compose up -d` tras cambiar el compose) recrea el contenedor k3s del EKS (el volumen persiste; tarda minutos y los agentes se reconectan); no hacerlo durante una prueba de carga.
+- **Operación:** respaldos `kubectl -n propuestas create job --from=cronjob/propuestas-backup <nombre>`; ensayo de restauración `scripts/aws-floci/restore-drill.sh`; HPA `DEMO_PASSWORD=... K6_BIN=<k6> scripts/aws-floci/hpa-test.sh`; capturas `scripts/aws-floci/screenshots.mjs`. Consola web de Floci: `http://<ip>:4500`.
+- **Límite conocido (Floci 2.3.0):** el listener HTTPS del ALB no termina TLS (HTTP plano en :8443); `alb_redirect_http=false`. Ver `docs/evidencias/aws-floci-2026-10-v2.md`.

@@ -12,10 +12,9 @@ f=$(awsf s3 ls s3://propuestas-backups/db/ | awk '{print $4}' | sort | tail -1)
 D=$(mktemp -d); trap 'rm -rf "$D"' EXIT
 awsf s3 cp "s3://propuestas-backups/db/$f" "$D/b.dump" --quiet
 scp -q -i "$KEY" "$D/b.dump" "ubuntu@$FLOCI_IP:/tmp/b.dump"
-awsf secretsmanager get-secret-value --secret-id propuestas/db --query SecretString --output text | jq -r .password \
-| $SSH "bash -s" "$TABLAS" <<'REMOTE'
+REMOTE=$(cat <<'EOS'
 read -r PGPASSWORD; export PGPASSWORD
-TABLAS=$1
+TABLAS="$1"
 PQ() { docker run --rm --network host -e PGPASSWORD -v /tmp/b.dump:/d/b.dump:ro docker.io/library/postgres:18.6-alpine "$@"; }
 C="-h 127.0.0.1 -p 7001 -U propuestas"
 PQ psql $C -d propuestas -qc "drop database if exists restore_drill" -c "create database restore_drill"
@@ -29,5 +28,9 @@ for t in $TABLAS; do
 done
 PQ psql $C -d propuestas -qc "drop database restore_drill"; rm -f /tmp/b.dump
 exit $fail
-REMOTE
+EOS
+)
+# la contraseña va por stdin; el programa remoto va como argumento (bash -c), no por stdin
+awsf secretsmanager get-secret-value --secret-id propuestas/db --query SecretString --output text | jq -r .password \
+  | $SSH "echo $(printf '%s' "$REMOTE" | base64 -w0) | base64 -d > /tmp/drill.sh; bash /tmp/drill.sh '$TABLAS'; r=\$?; rm -f /tmp/drill.sh; exit \$r"
 echo "respaldo restaurado: $f (base restore_drill eliminada)"

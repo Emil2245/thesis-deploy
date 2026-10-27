@@ -18,12 +18,12 @@ patches:
         value: 92.14.0
       - op: replace
         path: /spec/sources/1/targetRevision
-        value: feat/040-floci-sin-brechas
+        value: main
   - target: {kind: Application, name: tempo}
     patch: |-
       - op: replace
         path: /spec/sources/1/targetRevision
-        value: feat/040-floci-sin-brechas
+        value: main
       # Floci desactiva el StorageClass local-path (como EKS sin CSI): Tempo sin PVC (trazas efímeras; retención 72 h no aplica)
       - op: add
         path: /spec/sources/0/helm/valuesObject

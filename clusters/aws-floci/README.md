@@ -10,6 +10,8 @@ un emulador de AWS (puerto 4566) que levanta EKS (k3s real), RDS (PostgreSQL rea
 **Recomendado:** reserva DHCP en el router para esa IP (el endpoint de Floci, el kubeconfig y el CORS del overlay `aws` la usan).
 
 - Seed cloud-init: `scripts/lab/render-seeds.sh floci aws-lab-1` (plantilla `cloud-init/user-data.tmpl` + `compose.yaml`; no necesita token k3s).
-- Compose: imagen fijada `floci/floci:2.3.0`, socket de Docker, persistencia en `/opt/floci/data`, `postgres:18.6-alpine` para RDS, TLS habilitado (HTTP y HTTPS conviven en 4566; necesario para Fluent Bit y para la mutación de pod identity), puertos 4566, 7001-7099 (proxy RDS) y 8080-8089 (listeners ALB).
+- Compose: imagen fijada `floci/floci:2.3.0`, socket de Docker, persistencia en `/opt/floci/data`, `postgres:18.6-alpine` para RDS, TLS habilitado (HTTP y HTTPS conviven en 4566; el certificado cubre el nombre `floci`), puertos 4566, 7001-7099 (proxy RDS), 8080-8089 y 8443-8449 (listeners ALB).
 - Infraestructura: `infra/aws-floci/` (OpenTofu). Kubernetes: `k8s/propuestas/overlays/aws`. Scripts: `scripts/aws-floci/`.
 - Host del laboratorio: nunca reiniciar el PC; no tocar `k3s-lab-*`. Evidencia completa: `docs/evidencias/aws-floci-2026-10.md`. Operación: sección "Entorno aws-floci" del runbook.
+
+**Plan 040:** el entorno se levanta con `scripts/aws-floci/up.sh` (ver runbook y `manual-despliegue-floci/`); 2 nodos (servidor Floci + agente k3s), Pod Identity con relay propio, ESO, Traefik, Prometheus/Tempo, TLS verificado hacia Floci.

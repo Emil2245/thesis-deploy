@@ -25,7 +25,7 @@ curl -fsS "$FLOCI/_floci/health" | jq -r '"Floci " + .version'
 
 fase "2 OpenTofu (VPC, IAM, KMS, ECR, EKS, RDS, Secrets Manager, S3, ALB, ACM, CloudWatch)"
 tofu -chdir=infra/aws-floci init -input=false >/dev/null
-AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test tofu -chdir=infra/aws-floci apply -auto-approve -input=false -var "floci_endpoint=$FLOCI"
+AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test tofu -chdir=infra/aws-floci apply -auto-approve -input=false -var "floci_endpoint=$FLOCI" -var "node_count=${NODE_COUNT:-2}"
 
 fase "3 kubeconfig"
 $S/kubeconfig.sh

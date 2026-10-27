@@ -1,0 +1,2 @@
+propuestas-api-567f59779-dpl4r i-4e55973e304034aba.ec2.internal
+propuestas-api-567f59779-ntf74 worker-1.ec2.internal
