@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Prueba de escalamiento: k6 (tests/load/hpa-scaling.js) contra https://propuestas.<dominio> + linea de tiempo de replicas.
+# Imprime una linea de progreso por muestra (cada 10 s) y, al final, "replicas maximas listas: N" y "codigo de salida: C" (ultima linea).
 # Uso: DEMO_PASSWORD=... scripts/vps/hpa-test.sh <dominio> [VU_MULT]   (el certificado de la CA propia no se verifica en k6)
 set -u
 cd "$(dirname "$0")/../.."
@@ -17,4 +18,6 @@ jq 'del(.setup_data)' "$OUT/k6-summary.json" > "$OUT/k6-summary.tmp" && mv "$OUT
 wait $rec
 max=$(awk -F, 'NR>1 && $4+0>m{m=$4+0} END{print m+0}' "$OUT/timeline.csv")
 echo "replicas maximas listas: $max (minReplicas = 2)"
-[ "$max" -gt 2 ]
+[ "$max" -gt 2 ]; rc=$?
+echo "codigo de salida: $rc"
+exit $rc
