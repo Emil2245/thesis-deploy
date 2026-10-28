@@ -70,11 +70,12 @@ Manual completo y verificado: `manual-despliegue-floci/` en el repositorio de do
 - **Nodos:** el node group es metadato (Floci: un k3s por clúster); `add-workers.sh` une agentes k3s reales (IP fija 172.18.0.20x, destinos del ALB).
 - **Reiniciar Floci** (`docker compose up -d` tras cambiar el compose) recrea el contenedor k3s del EKS (el volumen persiste; tarda minutos y los agentes se reconectan); no hacerlo durante una prueba de carga.
 - **Operación:** respaldos `kubectl -n propuestas create job --from=cronjob/propuestas-backup <nombre>`; ensayo de restauración `scripts/aws-floci/restore-drill.sh`; HPA `DEMO_PASSWORD=... [K6_BIN=<k6>] [HPA_OUT=<dir>] scripts/aws-floci/hpa-test.sh` (resultados en `./hpa-resultados/`, ignorado por git; imprime fallidas, réplicas máximas y código de salida); capturas `scripts/aws-floci/screenshots.mjs`. Consola web de Floci: `http://<ip>:4500`.
-- **Límite conocido (Floci 2.3.0):** el listener HTTPS del ALB no termina TLS (HTTP plano en :8443); `alb_redirect_http=false`. Ver `docs/evidencias/aws-floci-2026-10-v2.md`.
+- **Límite conocido (Floci 2.3.0):** el listener HTTPS del ALB no termina TLS (HTTP plano en :8443); `alb_redirect_http=false`. Ver `docs/evidencias/aws-floci-2026-10-v2.md`; verificación en frío del manual: `docs/evidencias/verificacion-manuales-2026-10.md`.
 
 ## Entorno `vps` (VPS genérico, plan 041)
 - **Up:** `scripts/vps/up.sh <ip> --domain <dominio> --issuer <emisor> [--email <correo>] [--agent <ip2>] [--ssh-user u --ssh-key k] [--repo url --revision rama]`; idempotente (ocho fases: preflight, k3s, kubeconfig `~/.kube/propuestas-vps.yaml`, secretos, Argo CD, raíz parametrizada, espera, smoke). `DEMO_PASSWORD` activa el login del smoke.
 - **Down:** `scripts/vps/down.sh <ip> [--agent <ip2>] --yes` (desinstala k3s; borra todos los datos).
 - **Operación:** smoke `VPS_IP=<ip> VPS_DOMAIN=<dominio> VPS_ISSUER=<emisor> scripts/vps/smoke.sh`; respaldo manual `kubectl -n propuestas create job --from=cronjob/propuestas-backup <nombre>`; restauración de ensayo `scripts/vps/restore-drill.sh`; HPA `DEMO_PASSWORD=... scripts/vps/hpa-test.sh <dominio>`.
+- **Evidencia de la verificación en frío del manual (plan 042):** `docs/evidencias/verificacion-manuales-2026-10.md` (límites: Let's Encrypt no ejercitado, VM tras NAT).
 - **Laboratorio:** VM limpia `vps-lab-1` (4 vCPU / 8 GB): `scripts/vps/lab-vm.sh create|destroy|ip` (seed `render-seeds.sh vps`: solo usuario y clave SSH). Si se recrea la VM con la misma IP: `ssh-keygen -R <ip>`.
 - **Límite conocido:** el laboratorio está tras NAT, así que se verifica con `--issuer selfsigned-ca`; Let's Encrypt no se ejercitó allí.

@@ -43,12 +43,12 @@ Detalles, costos y state: [infra/hetzner/README.md](infra/hetzner/README.md).
 Sustituto ejecutable de producción: OpenTofu crea EKS, RDS (PostgreSQL 18), ECR, S3, Secrets Manager, KMS, ALB, ACM y Route 53
 en un emulador AWS (Floci) que corre en la VM `aws-lab-1` del laboratorio. App en `http://<IP de aws-lab-1>:8080` (ALB emulado; HTTPS 8443 declarado, ver límites en la evidencia v2). Manual de despliegue verificado: `manual-despliegue-floci/` (repo de documentación).
 `scripts/aws-floci/up.sh` · detalles: [clusters/aws-floci/README.md](clusters/aws-floci/README.md), runbook y
-[docs/evidencias/aws-floci-2026-10.md](docs/evidencias/aws-floci-2026-10.md) (v1) y [aws-floci-2026-10-v2.md](docs/evidencias/aws-floci-2026-10-v2.md) (plan 040, sin brechas).
+[docs/evidencias/aws-floci-2026-10.md](docs/evidencias/aws-floci-2026-10.md) (v1) y [aws-floci-2026-10-v2.md](docs/evidencias/aws-floci-2026-10-v2.md) (plan 040, sin brechas) y [verificacion-manuales-2026-10.md](docs/evidencias/verificacion-manuales-2026-10.md) (verificación en frío de los manuales, plan 042).
 
 ## Despliegue en un VPS genérico (plan 041)
 Una máquina Ubuntu 24.04 con IP pública y SSH (4 vCPU / 8 GB): `scripts/vps/up.sh <ip> --domain <dominio> --issuer <letsencrypt-prod|letsencrypt-staging|selfsigned-ca> [--email <correo>] [--agent <ip2>]`
 instala k3s, Argo CD y toda la plataforma (TLS, PostgreSQL con respaldos a S3, observabilidad, HPA). `scripts/vps/down.sh <ip> --yes` lo desmonta.
-Manual verificado: `manual-despliegue-vps/` (repo de documentación). Detalles: [docs/evidencias/vps-2026-10.md](docs/evidencias/vps-2026-10.md), runbook y decisiones.
+Manual verificado: `manual-despliegue-vps/` (repo de documentación). Detalles: [docs/evidencias/vps-2026-10.md](docs/evidencias/vps-2026-10.md), [verificación en frío del manual](docs/evidencias/verificacion-manuales-2026-10.md), runbook y decisiones.
 
 ## Releases
 Los submódulos fijan la versión de la app. **Cómo hacer un release:**
