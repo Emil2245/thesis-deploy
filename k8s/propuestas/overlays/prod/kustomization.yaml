@@ -9,10 +9,10 @@ resources:
 images:
 - name: ghcr.io/emil2245/propuestas-api
   newName: ghcr.io/emil2245/propuestas-api
-  newTag: 1a1ae4c
+  newTag: dbadbf0
 - name: ghcr.io/emil2245/propuestas-web
   newName: ghcr.io/emil2245/propuestas-web
-  newTag: 7fdbaf0
+  newTag: ce808f8
 configMapGenerator:
 - behavior: merge
   literals:
@@ -20,6 +20,8 @@ configMapGenerator:
   name: propuestas-api-config
       # plan 010 replaces PROD_IP
           # si hay rate limit de Let's Encrypt, probar primero con letsencrypt-staging
+    # plan 010 replaces PROD_IP
+        # si hay rate limit de Let's Encrypt, probar primero con letsencrypt-staging
     # plan 010 replaces PROD_IP
         # si hay rate limit de Let's Encrypt, probar primero con letsencrypt-staging
     # plan 010 replaces PROD_IP
