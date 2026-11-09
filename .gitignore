@@ -1,5 +1,6 @@
 *.pem
 .secrets/
+.local-stage03/
 kubeconfig*
 *.tfstate*
 .terraform/
