@@ -61,6 +61,11 @@ TLS interno, permisos IAM diferenciados, AWS real, borrado físico a las 24 h ni
 la suite completa de Core (GM_19 y GM_20 siguen diferidos). No sustituye los
 manifiestos GitOps existentes ni configura el trabajador periódico de limpieza.
 
+La [verificación local de cronograma de la etapa 04](docs/evidencias/stage04-cronograma-local-2026-11.md)
+comprueba POST, render remoto, tres formatos, ticket de un uso y GET heredado.
+**La descarga en Chromium quedó pendiente** por faltar el ejecutable de Playwright;
+no debe presentarse como prueba completa del flujo desde el navegador.
+
 ## Producción (Hetzner + k3s con OpenTofu)
 ```bash
 export HCLOUD_TOKEN=... TF_VAR_admin_cidrs='["<tu-ip>/32"]'
