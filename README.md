@@ -66,6 +66,10 @@ comprueba POST, render remoto, tres formatos, ticket de un uso, GET heredado y
 la descarga de XLSX, PDF A3 y MSPDI XML en el navegador integrado de Orca.
 La suite E2E de Playwright no se ejecutó: falta su ejecutable Chromium.
 
+La [verificación local de la etapa 05](docs/evidencias/stage05-retiro-descargas-local-2026-11.md)
+comprueba que los GET de bytes antiguos devuelven 404 y que POST + ticket
+funciona para presupuesto, APUs y cronograma en sus siete formatos.
+
 ## Producción (Hetzner + k3s con OpenTofu)
 ```bash
 export HCLOUD_TOKEN=... TF_VAR_admin_cidrs='["<tu-ip>/32"]'
