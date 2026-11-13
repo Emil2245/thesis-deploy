@@ -2,8 +2,7 @@
 
 Despliegue del entorno AWS emulado (`infra/aws-floci`, overlay `aws`) con la
 versión de microservicios, ejecutando Floci **en el portátil de desarrollo**
-(modo local, sin VM `aws-lab-1` ni SSH). Registro de tareas:
-[`odd/tasks/floci-microservicios.md`](../../odd/tasks/floci-microservicios.md).
+(modo local, sin VM `aws-lab-1` ni SSH).
 
 ## Entorno
 - Floci `2.4.0` en Docker (Fedora 44); EKS emulado = 1 nodo k3s `v1.37.0+k3s1`

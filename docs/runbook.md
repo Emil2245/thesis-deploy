@@ -21,8 +21,8 @@ export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock   # solo local
 **Qué hace fallar el build**
 - `validate.yml` / `manifests`: manifiestos que no pasan kubeconform (`scripts/validate.sh`).
 - `validate.yml` / `k8s-security`: Trivy config con hallazgos HIGH/CRITICAL en `k8s/` (local: `podman run --rm -v $PWD:/w:Z docker.io/aquasec/trivy:latest config --severity HIGH,CRITICAL /w/k8s`).
-- `validate.yml` / `iac`: `tofu validate`, `fmt -check` o tflint en `infra/hetzner` .
-- `release.yml`: Trivy image con CRITICAL que tenga fix disponible (`ignore-unfixed`) en `propuestas-api`/`propuestas-web`.
+- `validate.yml` / `iac`: `tofu validate`, `fmt -check` o tflint en `infra/hetzner` e `infra/aws-floci`.
+- `release.yml`: Trivy image con CRITICAL que tenga fix disponible (`ignore-unfixed`) en `propuestas-api`/`propuestas-web`. `release.yml` no construye `propuestas-documentos`: esa imagen solo se usa en el overlay `aws` (ver README, sección Releases).
 
 **Release:** `scripts/bump-submodules.sh` + push a `main`. El job `bump` commitea `chore(release): api <sha> web <sha> [skip ci]`.
 
@@ -61,7 +61,7 @@ Desactivar: quitar `../tunnel` de `k8s/platform/lab/kustomization.yaml`.
 Seguridad: la app es pública mientras el túnel corre; los usuarios demo del seed V004 tienen contraseñas conocidas, cambiarlas antes de compartir la URL.
 
 ## Entorno `aws-floci` (AWS emulado, planes 035 y 040)
-VM `aws-lab-1` (4 vCPU / 12 GB, IP DHCP; reservarla en el router) con Docker + Floci 2.3.0 (`clusters/aws-floci/compose.yaml`); estado persistente en `/opt/floci/data`.
+VM `aws-lab-1` (4 vCPU / 12 GB, IP DHCP; reservarla en el router) con Docker + Floci 2.4.0 (`clusters/aws-floci/compose.yaml`, imagen fijada); las corridas históricas v1/v2 usaron 2.3.0. Estado persistente en `/opt/floci/data`.
 Manual completo y verificado: `manual-despliegue-floci/` en el repositorio de documentación de la tesis (PDF).
 - **Crear / destruir la VM (laboratorio):** `scripts/aws-floci/lab-vm.sh create|destroy|ip` (renderiza el seed, lo copia al PC, crea `aws-lab-1`, espera IP y salud de Floci; `destroy` borra VM, disco y seed). La IP nueva no exige editar el repo: `up.sh` la usa en un parche en línea del `CORS_ORIGINS`. Salud: `curl http://<ip>:4566/_floci/health`.
 - **Up (un comando):** `FLOCI_IP=<ip> [DEMO_PASSWORD=...] scripts/aws-floci/up.sh [--revision <rama>] [--repo <url>] [--skip-smoke]` encadena Floci -> `tofu apply` -> kubeconfig -> nodos de trabajo -> imágenes a ECR -> CoreDNS+CA -> Argo CD -> espera -> `smoke.sh`. Idempotente (la copia a ECR se omite si la etiqueta ya existe con el mismo digest; caches de tofu bajo `~/.cache/propuestas-floci`, no en `/tmp`). Kubeconfig: `AWS_KUBECONFIG`, luego `KUBECONFIG`, luego `~/.kube/propuestas-aws.yaml`. Requiere `aws` CLI v2, `tofu`, `kubectl`, `helm`, `jq`, `skopeo`.
@@ -70,7 +70,8 @@ Manual completo y verificado: `manual-despliegue-floci/` en el repositorio de do
 - **Nodos:** el node group es metadato (Floci: un k3s por clúster); `add-workers.sh` une agentes k3s reales (IP fija 172.18.0.20x, destinos del ALB).
 - **Reiniciar Floci** (`docker compose up -d` tras cambiar el compose) recrea el contenedor k3s del EKS (el volumen persiste; tarda minutos y los agentes se reconectan); no hacerlo durante una prueba de carga.
 - **Operación:** respaldos `kubectl -n propuestas create job --from=cronjob/propuestas-backup <nombre>`; ensayo de restauración `scripts/aws-floci/restore-drill.sh`; HPA `DEMO_PASSWORD=... [K6_BIN=<k6>] [HPA_OUT=<dir>] scripts/aws-floci/hpa-test.sh` (resultados en `./hpa-resultados/`, ignorado por git; imprime fallidas, réplicas máximas y código de salida); capturas `scripts/aws-floci/screenshots.mjs`. Consola web de Floci: `http://<ip>:4500`.
-- **Límite conocido (Floci 2.3.0):** el listener HTTPS del ALB no termina TLS (HTTP plano en :8443); `alb_redirect_http=false`. Ver `docs/evidencias/aws-floci-2026-10-v2.md`; verificación en frío del manual: `docs/evidencias/verificacion-manuales-2026-10.md`.
+- **Modo local (2026-11):** `scripts/aws-floci/local-up.sh --revision <rama>` levanta Floci en el propio equipo (sin VM ni SSH, `NODE_COUNT=1`): construye las 3 imágenes desde `BACKEND_DIR`/`FRONTEND_DIR`, las copia a ECR con skopeo y ejecuta `up.sh`; `scripts/aws-floci/e2e-export.sh` prueba la exportación POST + ticket. Requiere los puertos 4566, 7001-7099, 8080-8089 y 8443-8449 libres. El overlay `aws` despliega tres Deployments (`propuestas-api`, `propuestas-documentos`, `propuestas-web`): `kubectl -n propuestas logs deploy/propuestas-documentos`. Evidencia: `docs/evidencias/floci-local-microservicios-2026-11.md`.
+- **Límite conocido (Floci 2.3.0):** el listener HTTPS del ALB no termina TLS (HTTP plano en :8443); `alb_redirect_http=false`. Floci 2.4.0 sí termina TLS en :8443 (verificado con la CA; `smoke.sh` acepta ambos comportamientos). Ver `docs/evidencias/aws-floci-2026-10-v2.md`; verificación en frío del manual: `docs/evidencias/verificacion-manuales-2026-10.md`.
 
 ## Entorno `vps` (VPS genérico, plan 041)
 - **Up:** `scripts/vps/up.sh <ip> --domain <dominio> --issuer <emisor> [--email <correo>] [--agent <ip2>] [--ssh-user u --ssh-key k] [--repo url --revision rama]`; idempotente (ocho fases: preflight, k3s, kubeconfig `~/.kube/propuestas-vps.yaml`, secretos, Argo CD, raíz parametrizada, espera, smoke). `DEMO_PASSWORD` activa el login del smoke.
