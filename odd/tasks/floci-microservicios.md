@@ -58,11 +58,11 @@ separados no puede llamar a Documentos.
   `FLOCI_IP` es local; construir imágenes desde los worktrees y `docker push` a
   ECR emulado (en vez de skopeo desde GHCR); `up.sh` espera rollout de
   Documentos. Check: `bash -n`, `shellcheck` si existe.
-- [ ] **T5 (ejecución)** — push de la rama; `up.sh` local; smoke existente +
+- [x] **T5 (ejecución)** — push de la rama; `up.sh` local; smoke existente +
   prueba E2E (registro/login, POST exportación, ticket 200, reuso 404, objeto en
   bucket `propuestas-documentos`). Registrar evidencia en
   `docs/evidencias/floci-local-microservicios-2026-11.md`.
-- [ ] **T6 (docs mínimos)** — sección corta en `clusters/aws-floci/README.md`
+- [x] **T6 (docs mínimos)** — sección corta en `clusters/aws-floci/README.md`
   (modo local + Documentos). Tesis/manual quedan fuera de alcance.
 
 ## Criterios de aceptación
@@ -114,6 +114,18 @@ feature autorizadas; PR/merge quedan a decisión del usuario.
   generación jq de parches de `root.sh` → OK. `shellcheck` **omitido** (no
   instalado). Sin ejecución real (T5).
 
+- **T5** (ruta: inline + delegado para datos E2E; trigger: backstop de sesión larga) — rama subida a GitHub.
+  `local-up.sh` 3ª ejecución: fases 1–8 OK, Applications Synced/Healthy a 575 s. Correcciones: contenedor `floci`
+  viejo renombrado (no borrado); `tofu import aws_db_instance.main propuestas-db` tras `DBInstanceAlreadyExists`
+  por reintento; push a ECR con skopeo (TLS de `*.localhost` no cubre el host anidado); smoke acepta TLS real
+  en :8443 (Floci 2.4.0). Smoke 17/17 OK. E2E `scripts/aws-floci/e2e-export.sh`: 8/8 documentos POST 200,
+  descarga 200, reuso 404, idempotencia OK (409 con otro cuerpo), objetos sólo en `propuestas-documentos`.
+  Límites: S3 de Floci acepta GET anónimo (IAM no aplicado); HTTP interno; 1 nodo (HPA dejó 2 pods Pending).
+  Evidencia: `docs/evidencias/floci-local-microservicios-2026-11.md`.
+- **T6** (ruta: inline) — sección "Modo local con microservicios" en `clusters/aws-floci/README.md`.
+
 ## Siguiente paso
-T5 (requiere `tofu` y `helm` instalados por el usuario): `scripts/aws-floci/local-up.sh --revision
-feat/floci-microservicios` tras push de la rama.
+Feature cerrada. Usuario (2026-11-13): rama backend subida y PRs abiertos — thesis-back-quarkus #17
+(`feat/core-documentos-internal-http`), thesis-deploy #14 (commits posteriores al #13 ya mergeado).
+Frontend y thesis-docs sin cambios pendientes respecto de `main`. S3 de Floci sin autenticación se acepta tal
+cual (sin cambios ni mención en la tesis). Merge: decisión del usuario. Entrega: RDD off → `disabled/unmanaged`.

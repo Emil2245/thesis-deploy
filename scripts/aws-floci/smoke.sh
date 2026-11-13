@@ -19,7 +19,12 @@ if [ "$RED" = true ]; then
 else
   # Floci 2.3.0: el listener HTTPS no termina TLS (ver infra/aws-floci/variables.tf, alb_redirect_http); se prueba por HTTP
   B=http://$FLOCI_IP:8080; C="curl -sS -m 30"
-  [ "$(curl -s -o /dev/null -w '%{http_code}' -m 20 http://$FLOCI_IP:8443/)" = 200 ] && ok "listener :8443 (HTTPS declarado, ACM) responde HTTP plano: limitación documentada de Floci 2.3.0" || bad ":8443 no responde"
+  # Floci 2.4.0 sí termina TLS en :8443 con el certificado ACM (verificado con la CA); 2.3.0 responde HTTP plano
+  if [ "$(curl -s -o /dev/null -w '%{http_code}' --cacert "$T/ca.pem" -m 20 https://$FLOCI_IP:8443/)" = 200 ]; then
+    ok "listener :8443 termina TLS con el certificado ACM (verificado con la CA)"
+  else
+    [ "$(curl -s -o /dev/null -w '%{http_code}' -m 20 http://$FLOCI_IP:8443/)" = 200 ] && ok "listener :8443 (HTTPS declarado, ACM) responde HTTP plano: limitación documentada de Floci 2.3.0" || bad ":8443 no responde"
+  fi
 fi
 for p in / /api/v1/config/display /privacidad; do
   c=$($C -o /dev/null -w '%{http_code}' "$B$p" 2>/dev/null); [ "$c" = 200 ] && ok "GET $p -> 200 ($B)" || bad "GET $p -> $c"
