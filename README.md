@@ -11,12 +11,14 @@ clusters/aws-floci/           VM aws-lab-1 (Docker + Floci, AWS emulado) y su cl
 k8s/argocd/                   values de Argo CD y app-of-apps (root-local/lab/prod)
 k8s/platform/                 add-ons por directorio: CloudNativePG, cert-manager+issuers, kube-prometheus-stack, loki, tempo, alloy, dashboards, sealed-secrets
 k8s/apps/                     Applications de la app por entorno
-k8s/propuestas/{base,overlays/{local,lab,prod,aws}}   manifiestos Kustomize
+k8s/propuestas/{base,overlays/{local,lab,prod,vps,aws}}   manifiestos Kustomize (Documentos solo en overlays/aws)
 infra/hetzner/                OpenTofu: Hetzner + k3s (plan 010)
 infra/aws-floci/              OpenTofu: EKS + RDS + ECR + S3 + Secrets Manager + ALB sobre AWS emulado (plan 035)
-scripts/                      vps/ (up, down, smoke, restore-drill, hpa-test, screenshots, lab-vm), install-tools, prod-up/down, cluster-local-up/down, build-local-images, bootstrap, validate, bump-submodules, seal-jwt, lab/ (tunnel-url), aws-floci/ (up, down, root, lab-vm, smoke, kubeconfig, add-workers, cluster-prep, copy-images, restore-drill, hpa-test, ca, sync-secrets, screenshots)
+compose.stage03-local.yaml    alternativa local con Docker Compose (Core + Documentos + web, sin k3d)
+scripts/                      vps/ (up, down, smoke, restore-drill, hpa-test, screenshots, lab-vm), install-tools, prod-up/down, cluster-local-up/down, build-local-images, stage03-local-up, bootstrap, validate, bump-submodules, seal-jwt, lab/ (tunnel-url), aws-floci/ (up, down, root, lab-vm, local-up, e2e-export, smoke, kubeconfig, add-workers, cluster-prep, copy-images, restore-drill, hpa-test, ca, sync-secrets, screenshots)
+tests/                        chaos/, load/, screenshots/, run-all.sh, security-scans.sh (pruebas de resiliencia, carga y seguridad)
 .github/workflows/            validate.yml (PR/push), release.yml (build+push GHCR+bump GitOps)
-docs/                         decisiones.md, runbook.md
+docs/                         decisiones.md, runbook.md, evidencias/ (corridas verificadas; índice en evidencias/README.md)
 ```
 
 ## Requisitos
@@ -31,44 +33,17 @@ scripts/bootstrap.sh local
 ```
 App en http://propuestas.127.0.0.1.sslip.io:8080
 
-## Etapa 03: integración local Core + Documentos + frontend
+## Alternativa local con Docker Compose (sin k3d)
 
-Si `k3d` no está instalado, esta ruta usa Docker Compose sin modificar el clúster,
-los submódulos fijados ni el Floci existente. Desde este repositorio, con Docker,
-AWS CLI, OpenSSL y los repositorios hermanos en sus ramas de etapa 03:
-
-```bash
-scripts/stage03-local-up.sh
-# Aplicación: http://127.0.0.1:8080/
-LOCAL_STAGE03_GID="$(id -g)" docker compose -f compose.stage03-local.yaml ps
-```
-
-`BACKEND_DIR` y `FRONTEND_DIR` pueden apuntar a otros worktrees. El script genera
-**dos** pares RSA locales en `.local-stage03/` (ignorados por Git), construye
-imágenes desde los worktrees, inicia PostgreSQL aislado y una instancia Floci
-2.4.0 aislada en `127.0.0.1:14569`, y crea su bucket de prueba con credenciales
-ficticias y endpoint explícito. Además inicia Mailpit en `127.0.0.1:18025`
-para verificar cuentas de prueba sin enviar correos reales; sus mensajes incluyen
-enlaces de activación, por lo que no deben compartirse. No ejecuta comandos de borrado. Al terminar,
-`LOCAL_STAGE03_GID="$(id -g)" docker compose -f compose.stage03-local.yaml stop`
-detiene solo los contenedores de esta composición sin borrar sus datos.
-
-Core (8082), Documentos (8081) y nginx (8080) escuchan solo en loopback con
-red del host para que Core utilice su excepción HTTP *únicamente* en loopback;
-nginx enruta `/api/` a Core sin registrar URL de tickets. Documentos no se
-expone al navegador. **Esta alternativa es solo local:** no prueba Kubernetes,
-TLS interno, permisos IAM diferenciados, AWS real, borrado físico a las 24 h ni
-la suite completa de Core (GM_19 y GM_20 siguen diferidos). No sustituye los
-manifiestos GitOps existentes ni configura el trabajador periódico de limpieza.
-
-La [verificación local de cronograma de la etapa 04](docs/evidencias/stage04-cronograma-local-2026-11.md)
-comprueba POST, render remoto, tres formatos, ticket de un uso, GET heredado y
-la descarga de XLSX, PDF A3 y MSPDI XML en el navegador integrado de Orca.
-La suite E2E de Playwright no se ejecutó: falta su ejecutable Chromium.
-
-La [verificación local de la etapa 05](docs/evidencias/stage05-retiro-descargas-local-2026-11.md)
-comprueba que los GET de bytes antiguos devuelven 404 y que POST + ticket
-funciona para presupuesto, APUs y cronograma en sus siete formatos.
+Si `k3d` no está instalado, `scripts/stage03-local-up.sh` levanta Core, Documentos, nginx,
+PostgreSQL, Floci 2.4.0 y Mailpit con `compose.stage03-local.yaml`, construyendo las imágenes
+desde los repositorios hermanos (`BACKEND_DIR` / `FRONTEND_DIR` apuntan a otros worktrees).
+Aplicación en http://127.0.0.1:8080/. Todo escucha solo en loopback y los pares RSA se generan
+en `.local-stage03/` (ignorado por Git). **Es solo local:** no prueba Kubernetes, TLS interno,
+permisos IAM diferenciados ni AWS real, y no sustituye los manifiestos GitOps. Detener sin borrar
+datos: `LOCAL_STAGE03_GID="$(id -g)" docker compose -f compose.stage03-local.yaml stop`.
+Verificaciones: [cronograma local (etapa 04)](docs/evidencias/stage04-cronograma-local-2026-11.md)
+y, con Kubernetes, [Floci local con microservicios](docs/evidencias/floci-local-microservicios-2026-11.md).
 
 ## Producción (Hetzner + k3s con OpenTofu)
 ```bash
@@ -80,7 +55,9 @@ Detalles, costos y state: [infra/hetzner/README.md](infra/hetzner/README.md).
 
 ## Nube emulada (AWS con Floci, plan 035)
 Sustituto ejecutable de producción: OpenTofu crea EKS, RDS (PostgreSQL 18), ECR, S3, Secrets Manager, KMS, ALB, ACM y Route 53
-en un emulador AWS (Floci) que corre en la VM `aws-lab-1` del laboratorio. App en `http://<IP de aws-lab-1>:8080` (ALB emulado; HTTPS 8443 declarado, ver límites en la evidencia v2). Manual de despliegue verificado: `manual-despliegue-floci/` (repo de documentación).
+en un emulador AWS (Floci) que corre en la VM `aws-lab-1` del laboratorio. App en `http://<IP de aws-lab-1>:8080` (ALB emulado). Floci 2.4.0 termina TLS en el listener `:8443` (verificado con la CA del ACM en [la evidencia local](docs/evidencias/floci-local-microservicios-2026-11.md)); Floci 2.3.0, usado en las corridas v1/v2, no lo hacía (ver límites en la evidencia v2). Manual de despliegue verificado: `manual-despliegue-floci/` (repo de documentación).
+Se construyen **tres imágenes** (`propuestas-api`, `propuestas-web`, `propuestas-documentos`) y el overlay `aws` despliega Core, Documentos y web como Deployments separados.
+**Modo local** (Floci en el propio equipo, sin VM ni SSH, un nodo): `scripts/aws-floci/local-up.sh --revision <rama>` construye las imágenes, las copia a ECR con skopeo y ejecuta `up.sh`; `scripts/aws-floci/e2e-export.sh` prueba la exportación POST + ticket de los 8 documentos.
 `scripts/aws-floci/up.sh` · detalles: [clusters/aws-floci/README.md](clusters/aws-floci/README.md), runbook y
 [docs/evidencias/aws-floci-2026-10.md](docs/evidencias/aws-floci-2026-10.md) (v1) y [aws-floci-2026-10-v2.md](docs/evidencias/aws-floci-2026-10-v2.md) (plan 040, sin brechas) y [verificacion-manuales-2026-10.md](docs/evidencias/verificacion-manuales-2026-10.md) (verificación en frío de los manuales, plan 042).
 
@@ -94,6 +71,7 @@ Los submódulos fijan la versión de la app. **Cómo hacer un release:**
 `scripts/bump-submodules.sh` (avanza `apps/*` a `main`, pide confirmación, commitea; `-y` no interactivo) y `git push`.
 `release.yml` construye cada imagen desde el SHA del submódulo, la escanea (Trivy), la publica en GHCR como
 `propuestas-{api,web}:<sha7>` y el bot commitea los tags en `k8s/propuestas/overlays/prod` (`[skip ci]`); Argo CD sincroniza.
+**Límite:** `release.yml` construye solo `api` y `web`; no hay imagen `propuestas-documentos` en GHCR y los manifiestos de `k8s/propuestas/base` no incluyen Documentos. Documentos se despliega únicamente con `overlays/aws` (imagen construida y copiada a ECR por `scripts/aws-floci/local-up.sh`); `local`, `lab`, `prod` y `vps` siguen sin él.
 Validar manifiestos: `scripts/validate.sh`.
 
 Decisiones y pilares: [docs/decisiones.md](docs/decisiones.md). Operación: [docs/runbook.md](docs/runbook.md).
