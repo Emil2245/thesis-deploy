@@ -1,14 +1,31 @@
 #!/usr/bin/env bash
 # Copia (sin reconstruir) las imágenes de release de GHCR a ECR (Floci), preservando el digest del índice.
 # Corre skopeo dentro de la VM aws-lab-1 (allí *.localhost:4566 resuelve a loopback, como pide la URI de ECR).
-# Uso: copy-images.sh <tag-api> <tag-web>
+# IMAGES_SOURCE=local (scripts/aws-floci/local-up.sh): no usa GHCR; sube con docker push las imágenes construidas en este equipo
+# (propuestas-<n>:<tag>). ECR tiene etiquetas inmutables: si la etiqueta ya existe, se asume la misma construcción y no se sube.
+# Uso: copy-images.sh <tag-api> <tag-web> [<tag-documentos>]
 set -euo pipefail
 source "$(dirname "$0")/lib.sh"
-API=${1:?tag api}; WEB=${2:?tag web}
-for pair in "api:$API" "web:$WEB"; do
+API=${1:?tag api}; WEB=${2:?tag web}; DOC=${3:-}
+ECR=000000000000.dkr.ecr.us-east-1.localhost:4566
+pairs=("api:$API" "web:$WEB"); [ -z "$DOC" ] || pairs+=("documentos:$DOC")
+if [ "${IMAGES_SOURCE:-ghcr}" = local ]; then
+  awsf ecr get-login-password | docker login --username AWS --password-stdin "$ECR" >/dev/null || die "docker login a ECR ($ECR) fallo"
+  for pair in "${pairs[@]}"; do
+    n=${pair%%:*}; t=${pair##*:}
+    e=$(awsf ecr describe-images --repository-name propuestas-$n --image-ids imageTag=$t --query 'imageDetails[0].imageDigest' --output text 2>/dev/null || true)
+    if [ -n "$e" ] && [ "$e" != None ]; then echo "propuestas-$n:$t ya existe en ECR ($e): no se sube"; continue; fi
+    docker image inspect "propuestas-$n:$t" >/dev/null 2>&1 || die "no existe la imagen local propuestas-$n:$t (la construye local-up.sh)"
+    docker tag "propuestas-$n:$t" "$ECR/propuestas-$n:$t"
+    docker push -q "$ECR/propuestas-$n:$t" >/dev/null || die "fallo docker push de propuestas-$n:$t a ECR"
+    echo "propuestas-$n:$t -> ECR $(awsf ecr describe-images --repository-name propuestas-$n --image-ids imageTag=$t --query 'imageDetails[0].imageDigest' --output text)"
+  done
+  exit 0
+fi
+for pair in "${pairs[@]}"; do
   n=${pair%%:*}; t=${pair##*:}
   src="docker://ghcr.io/emil2245/propuestas-$n:$t"
-  dst="docker://000000000000.dkr.ecr.us-east-1.localhost:4566/propuestas-$n:$t"
+  dst="docker://$ECR/propuestas-$n:$t"
   g=$(skopeo inspect --format '{{.Digest}}' "$src")   # digest del indice (lo que publica GHCR)
   e=$(awsf ecr describe-images --repository-name propuestas-$n --image-ids imageTag=$t --query 'imageDetails[0].imageDigest' --output text 2>/dev/null || true)
   echo "propuestas-$n:$t"

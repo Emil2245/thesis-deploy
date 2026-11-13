@@ -34,6 +34,17 @@ awsf() { aws --endpoint-url "$FLOCI" "$@"; }
 LAB_KEY="${LAB_KEY:-$HOME/.ssh/tesis-lab}"
 SSHOPTS=(-i "$LAB_KEY" -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new)
 SSH="ssh ${SSHOPTS[*]} ubuntu@$FLOCI_IP"
+# Modo local (Floci en este equipo; FLOCI_LOCAL=1 o FLOCI_IP=127.0.0.1/localhost): "$SSH <cmd...>" se ejecuta aqui mismo, sin SSH
+# ni sudo. ssh_local une los argumentos con espacios y los pasa a bash -c, igual que ssh con el shell remoto, de modo que las
+# llamadas existentes ($SSH "cmd", $SSH "bash -s" a b <<EOF) no cambian. Datos de Floci en FLOCI_DATA_DIR (ver local-up.sh).
+case "$FLOCI_IP" in 127.0.0.1|localhost) FLOCI_LOCAL=1;; esac
+FLOCI_LOCAL=${FLOCI_LOCAL:-0}
+FLOCI_DATA_DIR=${FLOCI_DATA_DIR:-$HOME/.local/share/floci-propuestas}
+export FLOCI_LOCAL FLOCI_DATA_DIR
+if [ "$FLOCI_LOCAL" = 1 ]; then
+  ssh_local() { bash -c "$*"; }
+  SSH=ssh_local
+fi
 # tofu_out <nombre> [raw]: lee un output del estado local (infra/aws-floci/terraform.tfstate) con jq, sin tofu: no exige
 # proveedores instalados (evita descargar ~300 MB solo para leer un valor).
 tofu_out() {

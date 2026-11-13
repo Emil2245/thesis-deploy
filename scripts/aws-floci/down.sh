@@ -9,7 +9,14 @@ $SSH 'for n in $(docker ps -aq --filter name=floci-aws-eks-propuestas-worker-); 
 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test tofu -chdir=infra/aws-floci destroy -auto-approve -input=false -var "floci_endpoint=$FLOCI"
 rm -f "$AWS_KUBECONFIG"
 if [ "${1:-}" = "--reset" ]; then
-  $SSH 'cd /opt/floci && docker compose down -v && sudo rm -rf /opt/floci/data && sudo mkdir -p /opt/floci/data && docker compose up -d'
+  if [ "$FLOCI_LOCAL" = 1 ]; then
+    # local: los datos los escribe el contenedor (root); se vacian con un contenedor efimero, sin sudo
+    docker compose -f clusters/aws-floci/compose.yaml down -v
+    docker run --rm -v "$FLOCI_DATA_DIR:/d" alpine:3.22 sh -c 'rm -rf /d/* /d/.[!.]* 2>/dev/null; true'
+    docker compose -f clusters/aws-floci/compose.yaml up -d
+  else
+    $SSH 'cd /opt/floci && docker compose down -v && sudo rm -rf /opt/floci/data && sudo mkdir -p /opt/floci/data && docker compose up -d'
+  fi
   rm -f infra/aws-floci/terraform.tfstate*
   rm -f "$CRED"
 fi

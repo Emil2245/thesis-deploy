@@ -3,6 +3,7 @@
 # Idempotente: cada fase se puede repetir. Fases (cada una documentada en el manual de despliegue):
 #   1 salud de Floci · 2 tofu apply · 3 kubeconfig · 4 nodos de trabajo · 5 imágenes a ECR · 6 CoreDNS+CA · 7 Argo CD + GitOps · 8 espera · 9 smoke
 # Uso: FLOCI_IP=<ip-de-la-VM> scripts/aws-floci/up.sh [--revision <rama>] [--repo <url-git>] [--skip-smoke]
+#   Modo local: scripts/aws-floci/local-up.sh (construye las imágenes aquí y fija IMAGES_SOURCE=local, *_TAG y NODE_COUNT=1).
 #   DEMO_PASSWORD (opcional) activa el login en el smoke. La Application raiz se aplica con parches kustomize en linea (CORS del ALB,
 #   repo y rama), por lo que el repositorio no se edita nunca: sirve para cualquier IP de VM y cualquier fork o rama.
 set -euo pipefail
@@ -21,10 +22,17 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-for c in aws tofu kubectl helm jq skopeo ssh curl openssl; do command -v "$c" >/dev/null || die "falta la herramienta: $c"; done
+herr=(aws tofu kubectl helm jq curl openssl); [ "${IMAGES_SOURCE:-ghcr}" = local ] && herr+=(docker) || herr+=(skopeo)
+[ "$FLOCI_LOCAL" = 1 ] || herr+=(ssh)
+for c in "${herr[@]}"; do command -v "$c" >/dev/null || die "falta la herramienta: $c"; done
 OVERLAY=k8s/propuestas/overlays/aws/kustomization.yaml
-API_TAG=$(awk '/propuestas-api/{f=1} f&&/newTag/{print $2; exit}' "$OVERLAY")
-WEB_TAG=$(awk '/propuestas-web/{f=1} f&&/newTag/{print $2; exit}' "$OVERLAY")
+# etiquetas: las del entorno (local-up.sh) o, si no, las del overlay
+tag_overlay() { awk -v n="$1" '$0 ~ n"$" {f=1} f&&/newTag/{print $2; exit}' "$OVERLAY"; }
+API_TAG=${API_TAG:-$(tag_overlay propuestas-api)}
+WEB_TAG=${WEB_TAG:-$(tag_overlay propuestas-web)}
+DOCUMENTOS_TAG=${DOCUMENTOS_TAG:-$(tag_overlay propuestas-documentos)}
+# con imágenes locales las etiquetas no son las del overlay: root.sh las fija en la Application "propuestas" (kustomize.images)
+[ "${IMAGES_SOURCE:-ghcr}" = local ] && export API_TAG WEB_TAG DOCUMENTOS_TAG
 
 fase "1 salud de Floci"
 for _ in $(seq 1 60); do curl -fsS "$FLOCI/_floci/health" >/dev/null 2>&1 && break; sleep 5; done
@@ -39,11 +47,10 @@ $S/kubeconfig.sh
 kubectl wait --for=condition=Ready node --all --timeout=300s >/dev/null
 
 fase "4 nodos de trabajo"
+if [ "${NODE_COUNT:-2}" -gt 1 ]; then $S/add-workers.sh "${NODE_COUNT:-2}"; else echo "NODE_COUNT=1: sin nodos adicionales"; fi
 
-$S/add-workers.sh "${NODE_COUNT:-2}"
-
-fase "5 imágenes GHCR -> ECR ($API_TAG / $WEB_TAG)"
-$S/copy-images.sh "$API_TAG" "$WEB_TAG"
+fase "5 imágenes ${IMAGES_SOURCE:-ghcr} -> ECR ($API_TAG / $WEB_TAG / $DOCUMENTOS_TAG)"
+$S/copy-images.sh "$API_TAG" "$WEB_TAG" "$DOCUMENTOS_TAG"
 
 fase "6 CoreDNS (nombre floci) y CA de Floci"
 $S/cluster-prep.sh
@@ -65,6 +72,7 @@ kubectl -n argocd get applications
 [ -z "$bad" ] || { echo "Applications pendientes: $bad" >&2; exit 1; }
 kubectl -n propuestas rollout status deploy/propuestas-api --timeout=600s
 kubectl -n propuestas rollout status deploy/propuestas-web --timeout=300s
+kubectl -n propuestas rollout status deploy/propuestas-documentos --timeout=300s
 
 if [ "$SKIP_SMOKE" = 0 ]; then fase "9 smoke"; $S/smoke.sh; fi
 printf '\nListo en %ss: http://%s:8080 (ALB emulado; HTTPS 8443 declarado, ver variables.tf)\n' $((SECONDS-t0)) "$FLOCI_IP"
