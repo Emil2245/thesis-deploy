@@ -22,7 +22,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-herr=(aws tofu kubectl helm jq curl openssl); [ "${IMAGES_SOURCE:-ghcr}" = local ] && herr+=(docker) || herr+=(skopeo)
+herr=(aws tofu kubectl helm jq curl openssl); herr+=(skopeo); [ "${IMAGES_SOURCE:-ghcr}" = local ] && herr+=(docker)
 [ "$FLOCI_LOCAL" = 1 ] || herr+=(ssh)
 for c in "${herr[@]}"; do command -v "$c" >/dev/null || die "falta la herramienta: $c"; done
 OVERLAY=k8s/propuestas/overlays/aws/kustomization.yaml
