@@ -125,6 +125,7 @@ feature autorizadas; PR/merge quedan a decisión del usuario.
 - **T6** (ruta: inline) — sección "Modo local con microservicios" en `clusters/aws-floci/README.md`.
 
 ## Siguiente paso
-Feature cerrada en local. Pendiente decisión del usuario: push de la rama backend
-`feat/core-documentos-internal-http` (commit `12deae1`), PR/merge de ambas ramas, y si se endurece S3 de Floci
-(`FLOCI_SERVICES_S3_ENFORCE_AUTH` + IAM) o se documenta en la tesis. Entrega: RDD off → `disabled/unmanaged`.
+Feature cerrada. Usuario (2026-11-13): rama backend subida y PRs abiertos — thesis-back-quarkus #17
+(`feat/core-documentos-internal-http`), thesis-deploy #14 (commits posteriores al #13 ya mergeado).
+Frontend y thesis-docs sin cambios pendientes respecto de `main`. S3 de Floci sin autenticación se acepta tal
+cual (sin cambios ni mención en la tesis). Merge: decisión del usuario. Entrega: RDD off → `disabled/unmanaged`.
