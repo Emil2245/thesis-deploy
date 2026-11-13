@@ -39,3 +39,33 @@ spec:
   data:
     - {secretKey: privateKey.pem, remoteRef: {key: propuestas/jwt, property: privateKey}}
     - {secretKey: publicKey.pem, remoteRef: {key: propuestas/jwt, property: publicKey}}
+---
+# JWT de servicio Core -> Documentos (propuestas/documentos-service-jwt): la privada SOLO para Core y la pública SOLO para
+# Documentos, en Secrets separados para que ningún pod monte la mitad que no le corresponde.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: propuestas-documentos-service-jwt-private
+  namespace: propuestas
+spec:
+  refreshInterval: 1h
+  secretStoreRef: {kind: ClusterSecretStore, name: aws-secrets-manager}
+  target:
+    name: propuestas-documentos-service-jwt-private
+    creationPolicy: Owner
+  data:
+    - {secretKey: privateKey.pem, remoteRef: {key: propuestas/documentos-service-jwt, property: privateKey}}
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: propuestas-documentos-service-jwt-public
+  namespace: propuestas
+spec:
+  refreshInterval: 1h
+  secretStoreRef: {kind: ClusterSecretStore, name: aws-secrets-manager}
+  target:
+    name: propuestas-documentos-service-jwt-public
+    creationPolicy: Owner
+  data:
+    - {secretKey: publicKey.pem, remoteRef: {key: propuestas/documentos-service-jwt, property: publicKey}}
