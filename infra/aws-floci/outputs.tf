@@ -5,9 +5,14 @@ output "alb_listener_port" { value = var.alb_port }
 output "rds_endpoint" { value = aws_db_instance.main.endpoint }
 output "ecr_repository_urls" { value = { for k, r in aws_ecr_repository.repo : k => r.repository_url } }
 output "secret_arns" {
-  value = { db = aws_secretsmanager_secret.db.arn, jwt = aws_secretsmanager_secret.jwt.arn }
+  value = {
+    db                     = aws_secretsmanager_secret.db.arn
+    jwt                    = aws_secretsmanager_secret.jwt.arn
+    documentos_service_jwt = aws_secretsmanager_secret.documentos_service_jwt.arn
+  }
 }
 output "backups_bucket" { value = aws_s3_bucket.backups.bucket }
+output "documentos_bucket" { value = aws_s3_bucket.documentos.bucket }
 output "kms_key_alias" { value = aws_kms_alias.main.name }
 output "pod_role_arns" { value = { for k, r in aws_iam_role.pod : k => r.arn } }
 output "log_group" { value = aws_cloudwatch_log_group.api.name }
