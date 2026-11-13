@@ -1,6 +1,6 @@
 # Overlay "aws": EKS emulado por Floci (infra/aws-floci). Sin CNPG: la base de datos es RDS (PostgreSQL 18).
 # Tráfico: ALB (HTTPS 8443) -> NodePort 30080 de Traefik en todos los nodos -> Ingress "propuestas" (web + /api).
-# Los Secrets (propuestas-db-app, propuestas-jwt) los crea External Secrets Operator desde Secrets Manager
+# Los Secrets (propuestas-db-app, propuestas-jwt, propuestas-documentos-service-jwt-{private,public}) los crea External Secrets Operator desde Secrets Manager
 # (k8s/platform/aws-floci/eso-config); nunca viven en git. Las cargas usan pod identity (sin claves estáticas).
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -8,6 +8,9 @@ resources:
   - ../../base
   - serviceaccount.yaml
   - backup-cronjob.yaml
+  - documentos.yaml
+# Las etiquetas son las del último despliegue documentado; scripts/aws-floci/root.sh las sustituye (kustomize.images de la
+# Application "propuestas") cuando API_TAG/WEB_TAG/DOCUMENTOS_TAG vienen del entorno (p. ej. scripts/aws-floci/local-up.sh).
 images:
   - name: ghcr.io/emil2245/propuestas-api
     newName: 000000000000.dkr.ecr.us-east-1.localhost:4566/propuestas-api
@@ -15,6 +18,9 @@ images:
   - name: ghcr.io/emil2245/propuestas-web
     newName: 000000000000.dkr.ecr.us-east-1.localhost:4566/propuestas-web
     newTag: 7fdbaf0
+  - name: ghcr.io/emil2245/propuestas-documentos
+    newName: 000000000000.dkr.ecr.us-east-1.localhost:4566/propuestas-documentos
+    newTag: dec7a4b
 configMapGenerator:
   - name: propuestas-api-config
     behavior: merge
@@ -25,6 +31,15 @@ configMapGenerator:
       # trazas directo a Tempo (k8s/platform/tempo); métricas por ServiceMonitor (kube-prometheus-stack)
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo.monitoring.svc:4317
       - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=aws-floci
+      # Core -> Documentos (http solo al host interno listado; ver DOCUMENTOS_ALLOWED_HTTP_HOSTS en thesis-back-quarkus)
+      - DOCUMENTOS_BASE_URL=http://propuestas-documentos:8081
+      - DOCUMENTOS_ALLOWED_HTTP_HOSTS=propuestas-documentos
+      - DOCUMENTOS_SERVICE_SIGNING_KEY_LOCATION=file:/etc/propuestas/documentos-service-jwt/privateKey.pem
+      # Core lee (GetObject) del bucket privado de Documentos; credenciales por pod identity (SA propuestas-api)
+      - CORE_STORAGE_BUCKET=propuestas-documentos
+      - QUARKUS_S3_ENDPOINT_OVERRIDE=http://floci:4566
+      - QUARKUS_S3_AWS_REGION=us-east-1
+      - QUARKUS_S3_PATH_STYLE_ACCESS=true
 patches:
   # el CRD de CNPG no existe en este clúster (la base es RDS)
   - target: {kind: Cluster, name: propuestas-db}
@@ -67,6 +82,16 @@ patches:
       - op: add
         path: /spec/template/spec/initContainers/0/imagePullPolicy
         value: IfNotPresent
+      # identidad propia (rol propuestas-api) y clave privada del JWT de servicio hacia Documentos
+      - op: add
+        path: /spec/template/spec/serviceAccountName
+        value: propuestas-api
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value: {name: documentos-service-jwt, mountPath: /etc/propuestas/documentos-service-jwt, readOnly: true}
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value: {name: documentos-service-jwt, secret: {secretName: propuestas-documentos-service-jwt-private, defaultMode: 0440}}
   - target: {kind: Deployment, name: propuestas-web}
     patch: |-
       - op: add

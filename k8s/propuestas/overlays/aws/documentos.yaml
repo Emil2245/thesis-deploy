@@ -1,0 +1,114 @@
+# Servicio Documentos (etapa 05 de microservicios): renderiza XLSX/PDF/MSPDI/DOCX y los sube al bucket privado
+# propuestas-documentos. Solo Core lo llama (JWT de servicio iss=core, aud=documentos; clave pública por ESO).
+# Credenciales S3: pod identity (SA propuestas-documentos -> rol propuestas-documentos, infra/aws-floci). Sin claves estáticas.
+# Límite declarado: Core -> Documentos y Documentos -> S3 (http://floci:4566) viajan sin TLS dentro del clúster; la
+# NetworkPolicy de abajo restringe el ingreso a los pods de Core.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: propuestas-documentos
+---
+# SA de Core asociado al rol propuestas-api (solo GetObject sobre el bucket de Documentos).
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: propuestas-api
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: propuestas-documentos
+  labels:
+    app.kubernetes.io/name: propuestas-documentos
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: {maxSurge: 1, maxUnavailable: 0}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: propuestas-documentos
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: propuestas-documentos
+    spec:
+      serviceAccountName: propuestas-documentos
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 185
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: documentos
+          image: ghcr.io/emil2245/propuestas-documentos
+          imagePullPolicy: IfNotPresent
+          ports:
+            - {name: http, containerPort: 8081}
+          env:
+            - {name: DOCUMENTOS_HTTP_PORT, value: "8081"}
+            - {name: MP_JWT_VERIFY_PUBLICKEY_LOCATION, value: "file:/etc/propuestas/documentos-service-jwt/publicKey.pem"}
+            - {name: DOCUMENTOS_STORAGE_BUCKET, value: propuestas-documentos}
+            - {name: QUARKUS_S3_ENDPOINT_OVERRIDE, value: "http://floci:4566"}
+            - {name: QUARKUS_S3_AWS_REGION, value: us-east-1}
+            - {name: QUARKUS_S3_PATH_STYLE_ACCESS, value: "true"}
+          startupProbe:
+            httpGet: {path: /q/health/started, port: http}
+            periodSeconds: 5
+            failureThreshold: 36
+          livenessProbe:
+            httpGet: {path: /q/health/live, port: http}
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet: {path: /q/health/ready, port: http}
+            periodSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests: {cpu: 100m, memory: 256Mi}
+            limits: {memory: 768Mi}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 185
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+            seccompProfile: {type: RuntimeDefault}
+          volumeMounts:
+            - {name: service-jwt, mountPath: /etc/propuestas/documentos-service-jwt, readOnly: true}
+            - {name: tmp, mountPath: /tmp}
+      volumes:
+        - name: service-jwt
+          secret:
+            secretName: propuestas-documentos-service-jwt-public
+            defaultMode: 0440
+        - {name: tmp, emptyDir: {}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: propuestas-documentos
+  labels:
+    app.kubernetes.io/name: propuestas-documentos
+spec:
+  selector:
+    app.kubernetes.io/name: propuestas-documentos
+  ports:
+    - {name: http, port: 8081, targetPort: http}
+---
+# La base aplica default-deny-ingress: solo los pods de Core alcanzan Documentos.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-api-to-documentos
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/name: propuestas-documentos}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: {app.kubernetes.io/name: propuestas-api}
+      ports:
+        - {port: 8081, protocol: TCP}

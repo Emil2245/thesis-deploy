@@ -34,10 +34,10 @@ if [ -n "${DEMO_PASSWORD:-}" ]; then
 fi
 
 # G1/G5: nodos e ingress
-n=$(kubectl get nodes --no-headers | grep -c ' Ready'); [ "$n" -ge 2 ] && ok "$n nodos Ready" || bad "nodos Ready: $n"
+n=$(kubectl get nodes --no-headers | grep -c ' Ready'); [ "$n" -ge "${NODE_COUNT:-2}" ] && ok "$n nodos Ready" || bad "nodos Ready: $n"
 chk "Ingress propuestas con clase traefik" kubectl -n propuestas get ingress propuestas -o jsonpath='{.spec.ingressClassName}'
 # G3: ESO
-for e in propuestas-db-app propuestas-jwt; do
+for e in propuestas-db-app propuestas-jwt propuestas-documentos-service-jwt-private propuestas-documentos-service-jwt-public; do
   s=$(kubectl -n propuestas get externalsecret "$e" -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null); [ "$s" = True ] && ok "ExternalSecret $e Ready" || bad "ExternalSecret $e: $s"
 done
 # G2: sin claves estáticas de AWS en el clúster ni TLS sin verificar en el repo

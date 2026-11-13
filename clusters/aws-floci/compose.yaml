@@ -1,8 +1,9 @@
 # Floci (emulador AWS) en la VM aws-lab-1. Se copia a /opt/floci/compose.yaml por cloud-init.
+# Modo local (portátil): scripts/aws-floci/local-up.sh lo arranca con FLOCI_DATA_DIR bajo $HOME (sin sudo).
 name: floci
 services:
   floci:
-    image: floci/floci:2.3.0
+    image: floci/floci:2.4.0
     container_name: floci
     restart: unless-stopped
     ports:
@@ -12,7 +13,7 @@ services:
       - "8443-8449:8443-8449"  # listeners ALB (HTTPS)
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /opt/floci/data:/app/data
+      - ${FLOCI_DATA_DIR:-/opt/floci/data}:/app/data
     environment:
       FLOCI_STORAGE_MODE: persistent
       FLOCI_STORAGE_PERSISTENT_PATH: /app/data

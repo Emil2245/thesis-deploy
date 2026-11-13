@@ -97,6 +97,8 @@ data "aws_iam_policy_document" "pods_assume" {
 #   propuestas-workload (ns propuestas, SA propuestas-workload): respaldos a S3.
 #   propuestas-logs     (ns logging, SA fluent-bit): escribir en CloudWatch Logs.
 #   propuestas-eso      (ns external-secrets, SA external-secrets): leer Secrets Manager (External Secrets Operator).
+#   propuestas-api      (ns propuestas, SA propuestas-api): Core lee (GetObject/HEAD) los objetos que Documentos dejó en S3.
+#   propuestas-documentos (ns propuestas, SA propuestas-documentos): Documentos escribe y lee en su bucket privado.
 locals {
   pod_roles = {
     workload = {
@@ -113,6 +115,16 @@ locals {
       name = "propuestas-eso"
       ns   = "external-secrets"
       sa   = "external-secrets"
+    }
+    api = {
+      name = "propuestas-api"
+      ns   = "propuestas"
+      sa   = "propuestas-api"
+    }
+    documentos = {
+      name = "propuestas-documentos"
+      ns   = "propuestas"
+      sa   = "propuestas-documentos"
     }
   }
 }
@@ -152,13 +164,51 @@ data "aws_iam_policy_document" "pod" {
     for_each = each.key == "eso" ? [1] : []
     content {
       actions   = ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"]
-      resources = [aws_secretsmanager_secret.db.arn, aws_secretsmanager_secret.jwt.arn]
+      resources = [aws_secretsmanager_secret.db.arn, aws_secretsmanager_secret.jwt.arn, aws_secretsmanager_secret.documentos_service_jwt.arn]
     }
   }
   dynamic "statement" {
     for_each = each.key == "eso" ? [1] : []
     content {
       actions   = ["kms:Decrypt"]
+      resources = [aws_kms_key.main.arn]
+    }
+  }
+  # Core: solo lectura de objetos (GetObject cubre HEAD); nunca escribe ni borra en el bucket de Documentos.
+  dynamic "statement" {
+    for_each = each.key == "api" ? [1] : []
+    content {
+      actions   = ["s3:GetObject"]
+      resources = ["${aws_s3_bucket.documentos.arn}/*"]
+    }
+  }
+  dynamic "statement" {
+    for_each = each.key == "api" ? [1] : []
+    content {
+      actions   = ["kms:Decrypt"]
+      resources = [aws_kms_key.main.arn]
+    }
+  }
+  # Documentos: PutObject (condicional If-None-Match) y GetObject/HEAD. ListBucket solo para que un objeto ausente responda 404
+  # y no 403 (semántica de S3 sin ListBucket), que el reconcile distingue.
+  dynamic "statement" {
+    for_each = each.key == "documentos" ? [1] : []
+    content {
+      actions   = ["s3:PutObject", "s3:GetObject"]
+      resources = ["${aws_s3_bucket.documentos.arn}/*"]
+    }
+  }
+  dynamic "statement" {
+    for_each = each.key == "documentos" ? [1] : []
+    content {
+      actions   = ["s3:ListBucket"]
+      resources = [aws_s3_bucket.documentos.arn]
+    }
+  }
+  dynamic "statement" {
+    for_each = each.key == "documentos" ? [1] : []
+    content {
+      actions   = ["kms:Decrypt", "kms:GenerateDataKey"]
       resources = [aws_kms_key.main.arn]
     }
   }
@@ -179,7 +229,7 @@ resource "aws_iam_role_policy_attachment" "pod" {
 
 # ---------------------------------------------------------------- ECR
 resource "aws_ecr_repository" "repo" {
-  for_each             = toset(["propuestas-api", "propuestas-web"])
+  for_each             = toset(["propuestas-api", "propuestas-web", "propuestas-documentos"])
   name                 = each.key
   image_tag_mutability = "IMMUTABLE"
   image_scanning_configuration {
@@ -287,6 +337,28 @@ resource "aws_secretsmanager_secret_version" "jwt" {
   })
 }
 
+# Clave RSA de servicio Core -> Documentos (JWT iss=core, aud=documentos). Distinta de la clave JWT de usuarios.
+# La privada solo llega a Core y la pública solo a Documentos (ExternalSecrets separados en k8s/platform/aws-floci/eso-config).
+resource "tls_private_key" "documentos_service_jwt" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+resource "aws_secretsmanager_secret" "documentos_service_jwt" {
+  name                    = "propuestas/documentos-service-jwt"
+  kms_key_id              = aws_kms_key.main.arn
+  recovery_window_in_days = 0
+  tags                    = local.tags
+}
+
+resource "aws_secretsmanager_secret_version" "documentos_service_jwt" {
+  secret_id = aws_secretsmanager_secret.documentos_service_jwt.id
+  secret_string = jsonencode({
+    privateKey = tls_private_key.documentos_service_jwt.private_key_pem_pkcs8
+    publicKey  = tls_private_key.documentos_service_jwt.public_key_pem
+  })
+}
+
 # ---------------------------------------------------------------- S3
 resource "aws_s3_bucket" "backups" {
   bucket        = "propuestas-backups"
@@ -303,6 +375,31 @@ resource "aws_s3_bucket_versioning" "backups" {
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "backups" {
   bucket = aws_s3_bucket.backups.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = aws_kms_key.main.arn
+    }
+  }
+}
+
+# Bucket privado de Documentos (exportaciones). Mismo cifrado SSE-KMS que los respaldos; sin acceso público.
+resource "aws_s3_bucket" "documentos" {
+  bucket        = "propuestas-documentos"
+  force_destroy = true
+  tags          = local.tags
+}
+
+resource "aws_s3_bucket_public_access_block" "documentos" {
+  bucket                  = aws_s3_bucket.documentos.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "documentos" {
+  bucket = aws_s3_bucket.documentos.id
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm     = "aws:kms"

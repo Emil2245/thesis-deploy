@@ -31,6 +31,45 @@ scripts/bootstrap.sh local
 ```
 App en http://propuestas.127.0.0.1.sslip.io:8080
 
+## Etapa 03: integración local Core + Documentos + frontend
+
+Si `k3d` no está instalado, esta ruta usa Docker Compose sin modificar el clúster,
+los submódulos fijados ni el Floci existente. Desde este repositorio, con Docker,
+AWS CLI, OpenSSL y los repositorios hermanos en sus ramas de etapa 03:
+
+```bash
+scripts/stage03-local-up.sh
+# Aplicación: http://127.0.0.1:8080/
+LOCAL_STAGE03_GID="$(id -g)" docker compose -f compose.stage03-local.yaml ps
+```
+
+`BACKEND_DIR` y `FRONTEND_DIR` pueden apuntar a otros worktrees. El script genera
+**dos** pares RSA locales en `.local-stage03/` (ignorados por Git), construye
+imágenes desde los worktrees, inicia PostgreSQL aislado y una instancia Floci
+2.4.0 aislada en `127.0.0.1:14569`, y crea su bucket de prueba con credenciales
+ficticias y endpoint explícito. Además inicia Mailpit en `127.0.0.1:18025`
+para verificar cuentas de prueba sin enviar correos reales; sus mensajes incluyen
+enlaces de activación, por lo que no deben compartirse. No ejecuta comandos de borrado. Al terminar,
+`LOCAL_STAGE03_GID="$(id -g)" docker compose -f compose.stage03-local.yaml stop`
+detiene solo los contenedores de esta composición sin borrar sus datos.
+
+Core (8082), Documentos (8081) y nginx (8080) escuchan solo en loopback con
+red del host para que Core utilice su excepción HTTP *únicamente* en loopback;
+nginx enruta `/api/` a Core sin registrar URL de tickets. Documentos no se
+expone al navegador. **Esta alternativa es solo local:** no prueba Kubernetes,
+TLS interno, permisos IAM diferenciados, AWS real, borrado físico a las 24 h ni
+la suite completa de Core (GM_19 y GM_20 siguen diferidos). No sustituye los
+manifiestos GitOps existentes ni configura el trabajador periódico de limpieza.
+
+La [verificación local de cronograma de la etapa 04](docs/evidencias/stage04-cronograma-local-2026-11.md)
+comprueba POST, render remoto, tres formatos, ticket de un uso, GET heredado y
+la descarga de XLSX, PDF A3 y MSPDI XML en el navegador integrado de Orca.
+La suite E2E de Playwright no se ejecutó: falta su ejecutable Chromium.
+
+La [verificación local de la etapa 05](docs/evidencias/stage05-retiro-descargas-local-2026-11.md)
+comprueba que los GET de bytes antiguos devuelven 404 y que POST + ticket
+funciona para presupuesto, APUs y cronograma en sus siete formatos.
+
 ## Producción (Hetzner + k3s con OpenTofu)
 ```bash
 export HCLOUD_TOKEN=... TF_VAR_admin_cidrs='["<tu-ip>/32"]'

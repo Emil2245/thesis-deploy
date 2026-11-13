@@ -1,5 +1,6 @@
 *.pem
 .secrets/
+.local-stage03/
 kubeconfig*
 *.tfstate*
 .terraform/
@@ -8,3 +9,5 @@ kubeconfig*
 tests/load/results/
 !scripts/aws-floci/kubeconfig.sh
 hpa-resultados/
+# datos de Floci en modo local si FLOCI_DATA_DIR apunta dentro del repo (scripts/aws-floci/local-up.sh)
+.floci-data/
