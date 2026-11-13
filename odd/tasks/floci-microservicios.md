@@ -36,7 +36,7 @@ separados no puede llamar a Documentos.
 - RDD: **off** (global) → entrega `disabled/unmanaged`.
 
 ## Tareas
-- [ ] **T1 (backend, delegado: writer 2 archivos)** — propiedad
+- [x] **T1 (backend, delegado: writer 2 archivos)** — propiedad
   `documentos.allowed-http-hosts` (lista, vacía por defecto) en Core;
   `DocumentosExportClient` acepta `http` solo si el host está en la lista o es
   loopback. RED → GREEN en `DocumentosExportClientTest`. Commit en
@@ -77,6 +77,7 @@ Forecast ≈ 350–450 líneas. Estrategia `ask-on-risk`. Push solo de las ramas
 feature autorizadas; PR/merge quedan a decisión del usuario.
 
 ## Progreso / evidencia
+- **T1** (ruta: delegated; trigger: writer 2 archivos) — `thesis-back-quarkus` commit `12deae1` (rama `feat/core-documentos-internal-http`). RED: `acceptsHttpOnlyForExplicitlyListedInternalHosts` falló con stub (1/9); GREEN: `DocumentosExportClientTest` 9/9; `documento.exportacion.*` 70 = 69 pass + 1 skipped (`PrivateObjectDeleterFlociIT`, condicional preexistente); spotlessCheck y `:core:build -x test` PASS.
 - **T2** (ruta: delegated; trigger: writer 2 archivos + mapeo >4) — commit `7b9747d`.
   `infra/aws-floci/main.tf`, `outputs.tf`: ECR `propuestas-documentos`, bucket
   privado SSE-KMS + public access block, roles pod identity `api` (SA
@@ -114,5 +115,5 @@ feature autorizadas; PR/merge quedan a decisión del usuario.
   instalado). Sin ejecución real (T5).
 
 ## Siguiente paso
-T1 (si sigue pendiente) y T5: `scripts/aws-floci/local-up.sh --revision
+T5 (requiere `tofu` y `helm` instalados por el usuario): `scripts/aws-floci/local-up.sh --revision
 feat/floci-microservicios` tras push de la rama.
